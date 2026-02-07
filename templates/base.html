@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Wasi Cine{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="bg-gray-50 text-gray-900 font-sans">
+    <!-- Nav -->
+    <header class="bg-white shadow">
+      <nav
+        class="container mx-auto px-6 py-4 flex justify-between items-center"
+      >
+        <a href="#" class="text-2xl font-bold text-red-600">Wasi Cine</a>
+        <ul class="flex gap-6 text-sm font-medium">
+          <li>
+            <a href="Cartelera.html" class="hover:text-red-600">Cartelera</a>
+          </li>
+          <li><a href="#" class="hover:text-red-600">Próximamente</a></li>
+          <li><a href="#" class="hover:text-red-600">Promociones</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Contenido-->
+    <main class="container mx-auto px-6 py-8">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 text-sm text-center p-6 mt-auto">
+      © 2026 Wasi Cine - Todos los derechos reservados
+    </footer>
+  </body>
+</html>
