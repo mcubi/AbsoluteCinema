@@ -1,36 +1,92 @@
-<!doctype html>
+{% load static %}
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>{% block title %}Wasi Cine{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absolute Cinema - {% block title %}Inicio{% endblock %}</title>
 
-  <body class="bg-gray-50 text-gray-900 font-sans">
-    <!-- Nav -->
-    <header class="bg-white shadow">
-      <nav
-        class="container mx-auto px-6 py-4 flex justify-between items-center"
-      >
-        <a href="#" class="text-2xl font-bold text-red-600">Wasi Cine</a>
-        <ul class="flex gap-6 text-sm font-medium">
-          <li>
-            <a href="Cartelera.html" class="hover:text-red-600">Cartelera</a>
-          </li>
-          <li><a href="#" class="hover:text-red-600">Próximamente</a></li>
-          <li><a href="#" class="hover:text-red-600">Promociones</a></li>
-        </ul>
-      </nav>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ac-bg': '#050505',
+                        'ac-primary': '#8B5CF6',
+                        'ac-primary-dark': '#7C3AED', 
+                        'ac-gray': '#1F1F1F',
+                        'ac-text': '#E5E5E5',
+                    },
+                    fontFamily: {
+                        'sans': ['Outfit', 'sans-serif'],
+                        'brand': ['Bebas Neue', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-ac-bg text-ac-text font-sans flex flex-col min-h-screen selection:bg-ac-primary selection:text-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+
+    <header class="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+        <div class="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
+            
+            <div class="flex items-center gap-12">
+                <a href="/" class="text-3xl text-ac-primary font-brand tracking-widest hover:text-white transition duration-300 drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]">
+                    ABSOLUTE CINEMA
+                </a>
+                <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
+                    <a href="#" class="text-white hover:text-ac-primary transition">Inicio</a>
+                    <a href="#" class="hover:text-white transition">Películas</a>
+                    <a href="#" class="hover:text-white transition">Series</a>
+                    <a href="#" class="hover:text-white transition">Novedades</a>
+                    <a href="#" class="hover:text-white transition">Mi Lista</a>
+                </nav>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="hidden md:flex items-center bg-white/10 rounded-full px-3 py-1.5 border border-white/5 focus-within:border-ac-primary/50 focus-within:bg-black/50 transition-all">
+                    <i class="fas fa-search text-gray-400 text-xs mx-2"></i>
+                    <input type="text" placeholder="Buscar..." class="bg-transparent border-none outline-none text-sm text-white w-24 focus:w-48 transition-all placeholder-gray-500">
+                </div>
+                <button class="md:hidden text-white"><i class="fas fa-search"></i></button>
+                <button class="text-gray-300 hover:text-white transition relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 h-2 w-2 bg-ac-primary rounded-full animate-pulse"></span>
+                </button>
+                <div class="h-9 w-9 rounded-full bg-gradient-to-br from-ac-primary to-blue-600 p-[2px] cursor-pointer hover:scale-105 transition">
+                  <img src="{% static 'img/avatar.jpg' %}" alt="User" class="rounded-full bg-black h-full w-full object-cover">
+                </div>
+            </div>
+        </div>
     </header>
 
-    <!-- Contenido-->
-    <main class="container mx-auto px-6 py-8">
-      {% block content %}{% endblock %}
+    <main class="flex-grow w-full">
+        {% block content %}
+        {% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-gray-300 text-sm text-center p-6 mt-auto">
-      © 2026 Wasi Cine - Todos los derechos reservados
+    <footer class="bg-black text-gray-500 py-12 px-6 border-t border-white/5 mt-auto">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-sm">
+                <span class="font-brand text-xl text-gray-400 tracking-wider">ABSOLUTE CINEMA</span>
+                <p class="mt-2">&copy; 2026 Proyecto TFG.</p>
+            </div>
+            <div class="flex gap-6 text-lg">
+                <a href="#" class="hover:text-ac-primary transition"><i class="fab fa-github"></i></a>
+                <a href="#" class="hover:text-ac-primary transition"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-ac-primary transition"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
     </footer>
-  </body>
+
+    {% block extra_js %}{% endblock %}
+</body>
 </html>
