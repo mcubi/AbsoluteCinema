@@ -37,6 +37,7 @@ This is a kind of Netflix clone in web, for the final degree project.
 Coming soon!
 --- 
 ## PROJECT STRUCTURE:
+```
 ABSOLUTECINEMA/
 ├── absolute_cinema/   # Project folder
 ├── movies/   # Serves the recent movie catalog as homepage and the full catalog
@@ -45,6 +46,7 @@ ABSOLUTECINEMA/
 ├── rest_api/ # REST API functionality
 ├── chatbot/ # AI content suggestion functionality through WebSocket
 └── manage.py # General command file
+```
 ---
 ## COMING SOON!
 
