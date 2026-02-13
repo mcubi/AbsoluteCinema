@@ -10,5 +10,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls), # administrator url pattern
-    path('', include('movies.urls')) # including the urlpatterns from movies - app
+    path('', include('movies.urls')), # including urlpatterns from movies - app
+    path('users/', include('users.urls')), # including urlpatterns from users - app
 ]
