@@ -128,6 +128,10 @@ USE_TZ = True
 # UNCHANGING FILES SERVED BY US (CSS, JavaScript, Images):
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
+
 STATIC_URL = 'static/'
 
 # DEFAULT PRIMARY KEY FIELD TYPE:
