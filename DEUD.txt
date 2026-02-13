@@ -1,0 +1,8 @@
+# AQUI LAS DEUDAS TECNICAS DEL PROYECTO HASTA NUEVO AVISO  ----- FICHERO PARA DESTRUIR AL FINALIZAR
+
+DEUDAS PENDIENTES:
+
+1. Registro y login / JSON
+2. APP_NAME's = {}
+3. Migrar a Tailwind como aplicación
+4.

@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',   # unchanging files served by us
     'movies',                       # catalog of movies and principal pages
     'users',                        # user management app
-    #'booking',                      # movie booking for users
+    #'prices',                      # movie prices and plans for users
 ]
 
 # MIDDLEWARES:
