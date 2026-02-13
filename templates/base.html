@@ -1,5 +1,5 @@
-<!doctype html>
 {% load static %}
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -24,11 +24,11 @@
         theme: {
           extend: {
             colors: {
-              "ac-bg": "#050505",
-              "ac-primary": "#8B5CF6",
+              "ac-bg": "#050505" /* Fondo Negro */,
+              "ac-primary": "#8B5CF6" /* Violeta Neón */,
               "ac-primary-dark": "#7C3AED",
-              "ac-gray": "#1F1F1F",
-              "ac-text": "#E5E5E5",
+              "ac-gray": "#1F1F1F" /* Gris Oscuro */,
+              "ac-text": "#E5E5E5" /* Texto Blanco */,
             },
             fontFamily: {
               sans: ["Outfit", "sans-serif"],
@@ -39,34 +39,35 @@
       };
     </script>
   </head>
+
   <body
     class="bg-ac-bg text-ac-text font-sans flex flex-col min-h-screen selection:bg-ac-primary selection:text-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
   >
     <header
-      class="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-md border-b border-white/5 transition-all duration-300"
+      class="fixed top-0 w-full z-[100] bg-black/70 backdrop-blur-md border-b border-white/5 transition-all duration-300"
     >
       <div
         class="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between"
       >
         <div class="flex items-center gap-12">
           <a
-            href="/"
+            href="{% url 'home' %}"
             class="text-3xl text-ac-primary font-brand tracking-widest hover:text-white transition duration-300 drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]"
           >
             ABSOLUTE CINEMA
           </a>
+
           <nav
             class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400"
           >
-            <!-- unregistered user -->
-            <a href="#" class="text-white hover:text-ac-primary transition"
+            <a
+              href="{% url 'home' %}"
+              class="text-white hover:text-ac-primary transition"
               >Inicio</a
             >
             <a href="#" class="hover:text-white transition">Películas</a>
             <a href="#" class="hover:text-white transition">Series</a>
             <a href="#" class="hover:text-white transition">Novedades</a>
-
-            <!-- registered user -->
             <a href="#" class="hover:text-white transition">Mi Lista</a>
           </nav>
         </div>
@@ -82,32 +83,89 @@
               class="bg-transparent border-none outline-none text-sm text-white w-24 focus:w-48 transition-all placeholder-gray-500"
             />
           </div>
-          <button class="md:hidden text-white">
-            <i class="fas fa-search"></i>
-          </button>
+
+          {% if user.is_authenticated %}
+
           <button class="text-gray-300 hover:text-white transition relative">
             <i class="fas fa-bell"></i>
             <span
               class="absolute -top-1 -right-1 h-2 w-2 bg-ac-primary rounded-full animate-pulse"
             ></span>
           </button>
-          <div
-            class="h-9 w-9 rounded-full bg-gradient-to-br from-ac-primary to-blue-600 p-[2px] cursor-pointer hover:scale-105 transition"
-          >
-            <img
-              src="{% static 'img/avatar.jpg' %}"
-              alt="User"
-              class="rounded-full bg-black h-full w-full object-cover"
-            />
+
+          <div class="relative group h-9 w-9">
+            <div
+              class="h-full w-full rounded-full bg-gradient-to-br from-ac-primary to-blue-600 p-[2px] cursor-pointer hover:scale-105 transition"
+            >
+              <img
+                src="{% static 'img/avatar.jpg' %}"
+                alt="Perfil"
+                class="rounded-full bg-black h-full w-full object-cover"
+              />
+            </div>
+
+            <div
+              class="absolute right-0 top-full mt-2 w-48 bg-[#181818] border border-white/10 rounded-lg shadow-2xl invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 transform origin-top-right z-50 overflow-hidden"
+            >
+              <div class="px-4 py-3 border-b border-white/10 bg-white/5">
+                <p class="text-[10px] text-gray-400 uppercase tracking-wider">
+                  Conectado como
+                </p>
+                <p class="text-sm font-bold text-white truncate">
+                  {{ user.username }}
+                </p>
+              </div>
+
+              <a
+                href="#"
+                class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition"
+              >
+                <i class="fas fa-user mr-2 text-xs"></i> Mi Perfil
+              </a>
+              <a
+                href="#"
+                class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition"
+              >
+                <i class="fas fa-cog mr-2 text-xs"></i> Configuración
+              </a>
+
+              <form
+                action="{% url 'logout' %}"
+                method="post"
+                class="block border-t border-white/10"
+              >
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition flex items-center"
+                >
+                  <i class="fas fa-sign-out-alt mr-2 text-xs"></i> Cerrar Sesión
+                </button>
+              </form>
+            </div>
           </div>
+
+          {% else %}
+
+          <a
+            href="{% url 'login' %}"
+            class="bg-ac-primary hover:bg-ac-primary-dark text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 flex items-center gap-2"
+          >
+            <span>Iniciar Sesión</span>
+            <i class="fas fa-arrow-right text-xs"></i>
+          </a>
+
+          {% endif %}
         </div>
       </div>
     </header>
 
-    <main class="flex-grow w-full">{% block content %} {% endblock %}</main>
+    <main class="flex-grow w-full pt-20 relative">
+      {% block content %} {% endblock %}
+    </main>
 
     <footer
-      class="bg-black text-gray-500 py-12 px-6 border-t border-white/5 mt-auto"
+      class="bg-black text-gray-500 py-12 px-6 border-t border-white/5 mt-auto z-10 relative"
     >
       <div
         class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6"
@@ -116,16 +174,16 @@
           <span class="font-brand text-xl text-gray-400 tracking-wider"
             >ABSOLUTE CINEMA</span
           >
-          <p class="mt-2">&copy; 2026 Proyecto TFG.</p>
+          <p class="mt-2 text-xs">&copy; 2026 Proyecto TFG - Desarrollo Web.</p>
         </div>
         <div class="flex gap-6 text-lg">
-          <a href="#" class="hover:text-ac-primary transition"
+          <a href="#" class="hover:text-ac-primary transition hover:scale-110"
             ><i class="fab fa-github"></i
           ></a>
-          <a href="#" class="hover:text-ac-primary transition"
+          <a href="#" class="hover:text-ac-primary transition hover:scale-110"
             ><i class="fab fa-twitter"></i
           ></a>
-          <a href="#" class="hover:text-ac-primary transition"
+          <a href="#" class="hover:text-ac-primary transition hover:scale-110"
             ><i class="fab fa-instagram"></i
           ></a>
         </div>
