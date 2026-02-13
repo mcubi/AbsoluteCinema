@@ -1,5 +1,5 @@
-{% load static %}
 <!doctype html>
+{% load static %}
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -51,7 +51,7 @@
       >
         <div class="flex items-center gap-12">
           <a
-            href="{% url 'home' %}"
+            href="#"
             class="text-3xl text-ac-primary font-brand tracking-widest hover:text-white transition duration-300 drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]"
           >
             ABSOLUTE CINEMA
@@ -60,9 +60,7 @@
           <nav
             class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400"
           >
-            <a
-              href="{% url 'home' %}"
-              class="text-white hover:text-ac-primary transition"
+            <a href="#" class="text-white hover:text-ac-primary transition"
               >Inicio</a
             >
             <a href="#" class="hover:text-white transition">Películas</a>
@@ -130,11 +128,11 @@
               </a>
 
               <form
-                action="{% url 'logout' %}"
+                action="#"
                 method="post"
                 class="block border-t border-white/10"
               >
-                {% csrf_token %}
+                <!--  {% csrf_token %} -->
                 <button
                   type="submit"
                   class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition flex items-center"
@@ -148,7 +146,7 @@
           {% else %}
 
           <a
-            href="{% url 'login' %}"
+            href="{% url 'users:log_in' %}"
             class="bg-ac-primary hover:bg-ac-primary-dark text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] hover:-translate-y-0.5 flex items-center gap-2"
           >
             <span>Iniciar Sesión</span>

@@ -1,3 +1,6 @@
+# Imports:
 from django.contrib import admin
+from .models import UserProfile
 
-# Register your models here.
+# Regs:
+admin.site.register(UserProfile)
