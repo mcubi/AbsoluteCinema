@@ -42,7 +42,7 @@ ABSOLUTECINEMA/
 ├── absolute_cinema/   # Project folder
 ├── movies/   # Serves the recent movie catalog as homepage and the full catalog
 ├── users/    # Usuer management and loyalty points system
-├── booking/ # App to manage prices and plans
+├── prices/ # App to manage prices and plans
 ├── rest_api/ # REST API functionality
 ├── chatbot/ # AI content suggestion functionality through WebSocket
 └── manage.py # General command file
