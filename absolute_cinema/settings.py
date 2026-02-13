@@ -10,9 +10,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 
 
-
+# IMPORTS:
 
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',      # ---
     'django.contrib.staticfiles',   # unchanging files served by us
     'movies',                       # catalog of movies and principal pages
-    #'users',                        # user management app
+    'users',                        # user management app
     #'booking',                      # movie booking for users
 ]
 
@@ -130,7 +132,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-import os
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
