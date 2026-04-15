@@ -2,5 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index_devolution) # on-click execute the homepage function
+    path('', views.home_api, name='home'),
+    path('pelicula/<int:movie_id>/', views.detalle_pelicula, name='detalle_pelicula'),
+    path('reproducir/<int:movie_id>/', views.reproducir_pelicula, name='reproducir_pelicula'),
 ]

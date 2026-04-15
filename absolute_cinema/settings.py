@@ -141,3 +141,22 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ============================================
+# CONFIGURATION OF THE API (TMDb)
+
+from dotenv import load_dotenv
+
+# load variables from the .env file
+load_dotenv()
+
+# API Key of the movie database (TMDb)
+TMDB_API_KEY = os.getenv('TMDB_API_KEY')
+
+# URLs base para TMDb
+TMDB_BASE_URL = 'https://api.themoviedb.org/3'
+TMDB_IMAGE_URL = 'https://image.tmdb.org/t/p/'
+
+# verify that the key was loaded correctly (for debugging)
+if not TMDB_API_KEY:
+    print("ADVERTENCIA: TMDB_API_KEY no encontrada en el archivo .env")
