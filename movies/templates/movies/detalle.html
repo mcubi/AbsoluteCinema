@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{{ pelicula.title }} | Absolute Cinema
+{% endblock %}
+
+{% block content %}
+
+<!--BACKGROUND-->
+<div class="relative min-h-screen">
+  <div class="absolute inset-0 z-0">
+    <img
+      src="{{ pelicula.backdrop_url|default:'https://image.tmdb.org/t/p/original' }}{{ pelicula.backdrop_path }}"
+      alt="{{ pelicula.title }}"
+      class="w-full h-full object-cover opacity-30"
+      onerror="this.src='https://via.placeholder.com/1920x1080?text=No+Image'"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-ac-bg via-ac-bg/80 to-black/60"></div> <!--to see the image better-->
+  </div>
+
+  <div class="relative z-10 container mx-auto px-4 py-32"> <!--on top of the background-->
+    <div class="flex flex-col md:flex-row gap-8">
+
+<!--POSTER-->
+      <div class="md:w-1/4">
+        <img
+          src="{{ pelicula.poster_url|default:'https://image.tmdb.org/t/p/w500' }}{{ pelicula.poster_path }}"
+          alt="{{ pelicula.title }}"
+          class="w-full rounded-lg shadow-2xl"
+          onerror="this.src='https://via.placeholder.com/500x750?text=No+Poster'"
+        />
+      </div>
+
+<!--TITLE-->
+      <div class="md:w-3/4 text-white">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">{{ pelicula.title }}</h1>
+        
+        {% if pelicula.tagline %}
+        <p class="text-xl text-gray-300 italic mb-4">{{ pelicula.tagline }}</p>
+        {% endif %}
+
+<!--INFO-->
+        <div class="flex items-center gap-4 mb-6 flex-wrap">
+          <!--rating of the movie-->
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-bold">{{ pelicula.vote_average|floatformat:1 }}</span>
+            <span class="text-gray-400">/10</span>
+          </div>
+          <span class="text-gray-400">•</span> 
+          <span>{{ pelicula.vote_count }} votos</span>
+          <span class="text-gray-400">•</span>
+          <span>{{ pelicula.release_date|slice:":4" }}</span> <!--the :4 is to show only the year(the first 4 numbers)-->
+          <span class="text-gray-400">•</span>
+          <span>{{ pelicula.runtime }} min</span>
+        </div>
+
+<!--GENRES-->
+        <div class="flex flex-wrap gap-2 mb-6">
+          {% for genre in pelicula.genres %}
+          <span class="bg-white/20 px-3 py-1 rounded-full text-sm">{{ genre.name }}</span>
+          {% endfor %}
+        </div>
+
+<!--SYNOPSIS-->
+        <h2 class="text-2xl font-semibold mb-3">Sinopsis</h2>
+        <p class="text-gray-300 text-lg mb-8 leading-relaxed">
+          {{ pelicula.overview|default:"Sin sinopsis disponible" }}
+        </p>
+
+<!--BUTTONS-->
+        <div class="flex flex-wrap gap-4 mb-8">
+          <button onclick="playMovie('{{ pelicula.id }}', '{{ pelicula.title|escapejs }}')" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-8 py-3 rounded-lg font-bold text-lg transition-all flex items-center gap-3 cursor-pointer">
+            <i class="fas fa-play"></i> Reproducir
+          </button>
+          <button id="miListaBtn" onclick="addToList(this, '{{ pelicula.id }}', '{{ pelicula.title|escapejs }}')" class="bg-white/10 hover:bg-white/20 text-white border border-white/10 px-8 py-3 rounded-lg font-semibold text-lg transition-all flex items-center gap-3 cursor-pointer">
+            <i class="fas fa-plus"></i> Mi Lista
+          </button>
+        </div>
+
+<!--CAST-->
+        {% if pelicula.cast %}
+        <h2 class="text-2xl font-semibold mb-4">Reparto Principal</h2>
+        <div class="flex overflow-x-auto gap-4 pb-4 mb-8">
+          {% for actor in pelicula.cast|slice:":10" %}
+          <div class="text-center min-w-[100px]">
+            <div class="w-24 h-24 rounded-full bg-gray-700 mx-auto overflow-hidden">
+              {% if actor.profile_path %}
+              <img
+                src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}"
+                alt="{{ actor.name }}"
+                class="w-full h-full object-cover"
+              />
+              {% else %}
+              <div class="w-full h-full flex items-center justify-center text-2xl bg-gray-600">
+                👤
+              </div>
+              {% endif %}
+            </div>
+            <p class="font-semibold mt-2 text-sm">{{ actor.name }}</p>
+            <p class="text-xs text-gray-400">{{ actor.character }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+<!--DIRECTOR-->
+        {% if pelicula.director %}
+        <div class="mb-8">
+          <h2 class="text-2xl font-semibold mb-2">Director</h2>
+          <p class="text-gray-300">{{ pelicula.director }}</p>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function playMovie(movieId, movieTitle) {
+    window.location.href = "/reproducir/" + movieId + "/";
+  }
+
+  function addToList(button, movieId, movieTitle) {
+    var isInList = button.classList.contains('added');
+    
+    if (isInList) {
+      button.classList.remove('added');
+      button.innerHTML = '<i class="fas fa-plus"></i> Mi Lista';
+    } else {
+      button.classList.add('added');
+      button.innerHTML = '<i class="fas fa-check"></i> En Mi Lista';
+    }
+  }
+</script>
+{% endblock %}

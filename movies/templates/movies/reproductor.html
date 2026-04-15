@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Reproduciendo: {{ pelicula.title }} <!--to put that next to the title-->
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-black">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            {{ pelicula.title }}
+        </h1>
+        
+        <div class="relative aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+            <video 
+                id="videoPlayer"
+                class="w-full h-full"
+                controls 
+                autoplay
+                controlsList="nodownload"
+                oncontextmenu="return false;"
+            >
+                <!--
+                <source src="https://blender.org/education/bunny/movies/bunny_1080p_30fps.mp4" type="video/mp4">
+                -->
+
+            </video>
+        </div>
+        
+        <div class="mt-6 text-gray-300">
+            <div class="flex items-center gap-4 mb-4">
+                <span class="bg-ac-primary/20 text-ac-primary px-3 py-1 rounded-full text-sm">
+                    {{ pelicula.vote_average|floatformat:1 }}/10
+                </span>
+                <span class="text-gray-400">{{ pelicula.release_date|slice:":4" }}</span>
+                <span class="text-gray-400">{{ pelicula.runtime }} min</span>
+            </div>
+            <p class="text-gray-400 leading-relaxed">
+                {{ pelicula.overview }}
+            </p>
+        </div>
+        
+        <div class="mt-8 flex gap-4">
+            <a href="/pelicula/{{ movie_id }}/" 
+               class="bg-ac-primary hover:bg-ac-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition">
+                <i class="fas fa-info-circle"></i> Ver detalles
+            </a>
+            <a href="/" 
+               class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold transition">
+                <i class="fas fa-home"></i> Volver al inicio
+            </a>
+        </div>
+    </div>
+</div>
+<!--
+<script>
+
+    var video = document.getElementById('videoPlayer'); //get the video by the ID
+    if (video) {
+        //if it exists it looks for the saved time if it has
+        var savedTime = localStorage.getItem('video_time_{{ pelicula.id }}');
+        if (savedTime && parseFloat(savedTime) > 5) {
+            video.currentTime = parseFloat(savedTime);
+        }
+        
+        //it save the time of the video, if you refresh the web it would be at the same part you left
+        video.addEventListener('timeupdate', function() {
+            if (video.currentTime > 0) {
+                localStorage.setItem('video_time_{{ pelicula.id }}', video.currentTime);
+            }
+        });
+    }
+</script>
+-->
+{% endblock %}
