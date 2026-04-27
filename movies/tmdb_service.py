@@ -1,144 +1,171 @@
-# Service for interacting with the TMDb (The Movie Database) API
 import requests
+import random
 from django.conf import settings
 
-# Search the movies for the title
-def search_movies(query, page=1):
-# query: search term
-# page: page number (optional)
+# Settings API TMDb
+API_KEY = settings.TMDB_API_KEY
+BASE_URL = "https://api.themoviedb.org/3"
+POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500"
+BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/original"
 
-    if not query:
-        return []
+def get_popular_movies():
+    url = f"{BASE_URL}/movie/popular?api_key={API_KEY}&language=es-ES&page=1"
+    response = requests.get(url)
     
-    url = f"{settings.TMDB_BASE_URL}/search/movie"
-    params = {
-        'api_key': settings.TMDB_API_KEY,
-        'query': query,
-        'language': 'es-ES',
-        'page': page,
-        'include_adult': False
-    }
-    
-    try:
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        
-        movies = response.json().get('results', [])
-        
-        # add url with the images
+    if response.status_code == 200:
+        movies = response.json().get('results', [])[:20]
+        formatted_movies = []
         for movie in movies:
-            if movie.get('poster_path'):
-                movie['poster_url'] = f"{settings.TMDB_IMAGE_URL}w500{movie['poster_path']}"
-            if movie.get('backdrop_path'):
-                movie['backdrop_url'] = f"{settings.TMDB_IMAGE_URL}original{movie['backdrop_path']}"
-        
-        return movies
-        
-    except requests.exceptions.RequestException as e:
-        print(f"Error en TMDb API: {e}")
-        return []
+            formatted_movies.append({
+                'id': movie['id'],
+                'title': movie['title'],
+                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                'backdrop_url': BACKDROP_BASE_URL,
+                'backdrop_path': movie.get('backdrop_path'),
+                'vote_average': movie['vote_average'],
+                'vote_count': movie.get('vote_count', 0),
+                'release_date': movie.get('release_date', ''),
+                'overview': movie.get('overview', ''),
+                'original_language': movie.get('original_language', '').upper(),
+            })
+        return formatted_movies
+    return []
+
+
+def get_now_playing_movies():
+    url = f"{BASE_URL}/movie/now_playing?api_key={API_KEY}&language=es-ES&page=1"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        movies = response.json().get('results', [])[:20]
+        formatted_movies = []
+        for movie in movies:
+            formatted_movies.append({
+                'id': movie['id'],
+                'title': movie['title'],
+                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                'backdrop_url': BACKDROP_BASE_URL,
+                'backdrop_path': movie.get('backdrop_path'),
+                'vote_average': movie['vote_average'],
+                'vote_count': movie.get('vote_count', 0),
+                'release_date': movie.get('release_date', ''),
+                'overview': movie.get('overview', ''),
+                'original_language': movie.get('original_language', '').upper(),
+            })
+        return formatted_movies
+    return []
+
+
+def get_top_rated_movies():
+    url = f"{BASE_URL}/movie/top_rated?api_key={API_KEY}&language=es-ES&page=1"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        movies = response.json().get('results', [])[:20]
+        formatted_movies = []
+        for movie in movies:
+            formatted_movies.append({
+                'id': movie['id'],
+                'title': movie['title'],
+                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                'backdrop_url': BACKDROP_BASE_URL,
+                'backdrop_path': movie.get('backdrop_path'),
+                'vote_average': movie['vote_average'],
+                'vote_count': movie.get('vote_count', 0),
+                'release_date': movie.get('release_date', ''),
+                'overview': movie.get('overview', ''),
+                'original_language': movie.get('original_language', '').upper(),
+            })
+        return formatted_movies
+    return []
 
 
 def get_movie_details(movie_id):
+    url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits"
+    response = requests.get(url)
     
-    url = f"{settings.TMDB_BASE_URL}/movie/{movie_id}"
-    params = {
-        'api_key': settings.TMDB_API_KEY,
-        'language': 'es-ES',
-        'append_to_response': 'credits,videos,similar'
-    }
-    
-    try:
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
+    if response.status_code == 200:
+        data = response.json()
         
-        movie = response.json()
+        # for the cast
+        cast = []
+        if 'credits' in data and 'cast' in data['credits']:
+            for actor in data['credits']['cast'][:12]:
+                cast.append({
+                    'name': actor.get('name'),
+                    'character': actor.get('character'),
+                    'profile_path': actor.get('profile_path'),
+                })
         
-        # add images url
-        if movie.get('poster_path'):
-            movie['poster_url'] = f"{settings.TMDB_IMAGE_URL}w500{movie['poster_path']}"
-        if movie.get('backdrop_path'):
-            movie['backdrop_url'] = f"{settings.TMDB_IMAGE_URL}original{movie['backdrop_path']}"
-        
-        # process main cast
-        if 'credits' in movie:
-            movie['cast'] = movie['credits'].get('cast', [])[:10]
-            
-            # find the director
-            director = None
-            for crew_member in movie['credits'].get('crew', []):
+        # for the director
+        director = None
+        if 'credits' in data and 'crew' in data['credits']:
+            for crew_member in data['credits']['crew']:
                 if crew_member.get('job') == 'Director':
                     director = crew_member.get('name')
                     break
-            movie['director'] = director
         
-        # process the trailers
-        if 'videos' in movie:
-            trailers = []
-            for video in movie['videos'].get('results', []):
-                if video.get('site') == 'YouTube' and video.get('type') == 'Trailer':
-                    trailers.append({
-                        'key': video.get('key'),
-                        'name': video.get('name')
-                    })
-            movie['trailers'] = trailers[:3]
+        # genres
+        genres = []
+        if 'genres' in data:
+            for genre in data['genres']:
+                genres.append({
+                    'id': genre.get('id'),
+                    'name': genre.get('name'),
+                })
         
-        return movie
-        
-    except requests.exceptions.RequestException as e:
-        print(f"Error obteniendo detalles de película: {e}")
-        return None
-
-
-def get_popular_movies(page=1):
-# get the list of popular movies
-    url = f"{settings.TMDB_BASE_URL}/movie/popular"
-    params = {
-        'api_key': settings.TMDB_API_KEY,
-        'language': 'es-ES',
-        'page': page
-    }
+        movie_details = {
+            'id': data.get('id'),
+            'title': data.get('title'),
+            'tagline': data.get('tagline'),
+            'overview': data.get('overview'),
+            'poster_path': data.get('poster_path'),
+            'backdrop_path': data.get('backdrop_path'),
+            'poster_url': f"{POSTER_BASE_URL}{data['poster_path']}" if data.get('poster_path') else None,
+            'backdrop_url': BACKDROP_BASE_URL,
+            'vote_average': data.get('vote_average', 0),
+            'vote_count': data.get('vote_count', 0),
+            'release_date': data.get('release_date', ''),
+            'runtime': data.get('runtime', 0),
+            'original_language': data.get('original_language', '').upper(),
+            'genres': genres,
+            'cast': cast,
+            'director': director,
+        }
+        return movie_details
     
-    try:
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        
-        data = response.json()
-        movies = data.get('results', [])
-        
-        for movie in movies:
-            if movie.get('poster_path'):
-                movie['poster_url'] = f"{settings.TMDB_IMAGE_URL}w342{movie['poster_path']}"
-        
-        return movies
-        
-    except requests.exceptions.RequestException as e:
-        print(f"Error obteniendo películas populares: {e}")
-        return []
+    return None
 
 
-def get_now_playing_movies(page=1):
-# get movies that are currently playing now in cinemas
+# for the random movies
 
-    url = f"{settings.TMDB_BASE_URL}/movie/now_playing"
-    params = {
-        'api_key': settings.TMDB_API_KEY,
-        'language': 'es-ES',
-        'page': page
-    }
+def get_random_popular_movies(limit=10):
     
-    try:
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
+    years = [2020, 2021, 2022, 2023, 2024, 2025, 2019, 2018, 2017, 2016]
+    random_years = random.sample(years, min(5, len(years)))
+    
+    all_movies = []
+    
+    for year in random_years:
+        url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&sort_by=popularity.desc&primary_release_year={year}&page=1"
+        response = requests.get(url)
         
-        movies = response.json().get('results', [])
-        
-        for movie in movies:
-            if movie.get('poster_path'):
-                movie['poster_url'] = f"{settings.TMDB_IMAGE_URL}w342{movie['poster_path']}"
-        
-        return movies
-        
-    except requests.exceptions.RequestException as e:
-        print(f"Error obteniendo películas en cartelera: {e}")
-        return []
+        if response.status_code == 200:
+            movies = response.json().get('results', [])[:4]
+            for movie in movies:
+                all_movies.append({
+                    'id': movie['id'],
+                    'title': movie['title'],
+                    'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                    'backdrop_url': BACKDROP_BASE_URL,
+                    'backdrop_path': movie.get('backdrop_path'),
+                    'vote_average': movie['vote_average'],
+                    'vote_count': movie.get('vote_count', 0),
+                    'release_date': movie.get('release_date', ''),
+                    'overview': movie.get('overview', ''),
+                    'original_language': movie.get('original_language', '').upper(),
+                })
+    
+    # suffle for the movies
+    random.shuffle(all_movies)
+    return all_movies[:limit]
