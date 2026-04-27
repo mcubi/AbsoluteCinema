@@ -4,5 +4,4 @@ from . import views
 urlpatterns = [
     path('', views.home_api, name='home'),
     path('pelicula/<int:movie_id>/', views.detalle_pelicula, name='detalle_pelicula'),
-    path('reproducir/<int:movie_id>/', views.reproducir_pelicula, name='reproducir_pelicula'),
 ]
