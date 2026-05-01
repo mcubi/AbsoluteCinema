@@ -51,23 +51,32 @@
       >
         <div class="flex items-center gap-12">
           <a
-            href="#"
+            href="{% url 'home' %}"
             class="text-3xl text-ac-primary font-brand tracking-widest hover:text-white transition duration-300 drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]"
           >
             ABSOLUTE CINEMA
           </a>
 
-          <nav
-            class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400"
-          >
-            <a href="#" class="text-white hover:text-ac-primary transition"
-              >Inicio</a
-            >
-            <a href="#" class="hover:text-white transition">Películas</a>
-            <a href="#" class="hover:text-white transition">Series</a>
-            <a href="#" class="hover:text-white transition">Novedades</a>
-            <a href="#" class="hover:text-white transition">Mi Lista</a>
-          </nav>
+          <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+    
+    <a href="{% url 'home' %}" 
+       class="{% if request.resolver_match.url_name == 'home' %}text-white font-bold{% else %}text-gray-400 hover:text-white{% endif %} transition duration-300">
+       Inicio
+    </a>
+    
+    <a href="{% url 'movies' %}" 
+       class="{% if request.resolver_match.url_name == 'movies' or request.resolver_match.url_name == 'detalle_pelicula' %}text-white font-bold{% else %}text-gray-400 hover:text-white{% endif %} transition duration-300">
+       Películas
+    </a>
+    
+    <a href="#" class="text-gray-400 hover:text-white transition duration-300">Novedades</a>
+    
+    <a href="{% url 'mi_lista' %}" 
+       class="{% if request.resolver_match.url_name == 'mi_lista' %}text-white font-bold{% else %}text-gray-400 hover:text-white{% endif %} transition duration-300">
+       Mi Lista
+    </a>
+    
+</nav>
         </div>
 
         <div class="flex items-center gap-6">

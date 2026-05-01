@@ -4,6 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+django = "*"
+python-dotenv = "*"
+requests = "*"
+pillow = "*"
 
 [dev-packages]
 
