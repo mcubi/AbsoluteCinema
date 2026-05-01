@@ -81,13 +81,14 @@ def get_top_rated_movies():
 
 
 def get_movie_details(movie_id):
-    url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits"
+    # ¡NUEVO! Hemos añadido ",watch/providers" al final de la URL
+    url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers"
     response = requests.get(url)
     
     if response.status_code == 200:
         data = response.json()
         
-        # for the cast
+        # --- CAST ---
         cast = []
         if 'credits' in data and 'cast' in data['credits']:
             for actor in data['credits']['cast'][:12]:
@@ -97,7 +98,7 @@ def get_movie_details(movie_id):
                     'profile_path': actor.get('profile_path'),
                 })
         
-        # for the director
+        # --- DIRECTOR ---
         director = None
         if 'credits' in data and 'crew' in data['credits']:
             for crew_member in data['credits']['crew']:
@@ -105,7 +106,7 @@ def get_movie_details(movie_id):
                     director = crew_member.get('name')
                     break
         
-        # genres
+        # --- GÉNEROS ---
         genres = []
         if 'genres' in data:
             for genre in data['genres']:
@@ -113,6 +114,20 @@ def get_movie_details(movie_id):
                     'id': genre.get('id'),
                     'name': genre.get('name'),
                 })
+
+        # --- ¡NUEVO! PLATAFORMAS DE STREAMING (ESPAÑA) ---
+        providers = []
+        if 'watch/providers' in data and 'results' in data['watch/providers']:
+            # Buscamos 'ES' para España (si quieres de otro país, cambia el código)
+            es_data = data['watch/providers']['results'].get('ES', {})
+            
+            # 'flatrate' significa que está en suscripción mensual (Netflix, Max, Prime, etc.)
+            if 'flatrate' in es_data:
+                for prov in es_data['flatrate']:
+                    providers.append({
+                        'name': prov.get('provider_name'),
+                        'logo_url': f"https://image.tmdb.org/t/p/original{prov.get('logo_path')}" if prov.get('logo_path') else None
+                    })
         
         movie_details = {
             'id': data.get('id'),
@@ -131,6 +146,7 @@ def get_movie_details(movie_id):
             'genres': genres,
             'cast': cast,
             'director': director,
+            'providers': providers, # <-- ¡AÑADIMOS LAS PLATAFORMAS AQUÍ!
         }
         return movie_details
     
