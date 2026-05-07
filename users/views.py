@@ -76,3 +76,28 @@ def login_user(request):
             messages.error(request, "Usuario o contraseña incorrectos")
             
     return render(request, 'users/login.html')
+
+# ***********************************************************************************+
+# user profile
+
+from django.contrib.auth.decorators import login_required
+from .forms import PerfilForm
+
+@login_required
+def mi_perfil(request):
+    # get the actual user's profile
+    perfil = request.user.perfil
+    
+    if request.method == 'POST':
+        form = PerfilForm(request.POST, request.FILES, instance=perfil)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Perfil actualizado correctamente")
+            return redirect('users:mi_perfil')
+    else:
+        form = PerfilForm(instance=perfil)
+    
+    return render(request, 'users/mi_perfil.html', {
+        'form': form,
+        'perfil': perfil,
+    })

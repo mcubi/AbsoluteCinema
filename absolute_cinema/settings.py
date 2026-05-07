@@ -160,3 +160,7 @@ TMDB_IMAGE_URL = 'https://image.tmdb.org/t/p/'
 # verify that the key was loaded correctly (for debugging)
 if not TMDB_API_KEY:
     print("ADVERTENCIA: TMDB_API_KEY no encontrada en el archivo .env")
+    
+# for profile images
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
