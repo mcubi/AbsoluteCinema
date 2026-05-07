@@ -101,3 +101,13 @@ def mi_perfil(request):
         'form': form,
         'perfil': perfil,
     })
+    
+
+# ***********************************************************************************+
+# config
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def configuracion(request):
+    return render(request, 'users/configuracion.html')

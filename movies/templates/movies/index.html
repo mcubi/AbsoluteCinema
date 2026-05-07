@@ -38,7 +38,7 @@ Inicio - Reseñas de Películas
         <!--votes-->
         <span class="bg-ac-primary/20 text-ac-primary border border-ac-primary/30 px-3 py-1 rounded text-xs font-bold backdrop-blur-md">
           <i class="fas fa-star text-xs"></i> {{ hero_movie.vote_average|floatformat:1 }}/10 </span>
-        <span class="text-gray-300 text-sm">{{ hero_movie.release_date|slice:":4" }}</span>
+        <span class="text-gray-600 dark:text-gray-300 text-sm">{{ hero_movie.release_date|slice:":4" }}</span>
       </div>
 
       <!--title-->
@@ -47,7 +47,7 @@ Inicio - Reseñas de Películas
       </h1>
 
       <!--synopsis, only 150 in phones-->
-      <p class="text-gray-300 text-base mb-6 line-clamp-2 max-w-2xl">
+      <p class="text-gray-600 dark:text-gray-300 text-base mb-6 line-clamp-2 max-w-2xl">
         {{ hero_movie.overview|truncatechars:150 }}
       </p>
 
@@ -62,8 +62,8 @@ Inicio - Reseñas de Películas
       </div>
 
       {% else %}
-      <h1 class="text-5xl md:text-7xl font-brand text-white mb-4">ABSOLUTE CINEMA</h1>
-      <p class="text-gray-300 text-lg">Tu comunidad de reseñas cinematográficas</p>
+      <h1 class="text-5xl md:text-7xl font-brand text-gray-900 dark:text-white mb-4">ABSOLUTE CINEMA</h1>
+      <p class="text-gray-600 dark:text-gray-300 text-lg">Tu comunidad de reseñas cinematográficas</p>
       {% endif %}
 
     </div>
@@ -71,65 +71,65 @@ Inicio - Reseñas de Películas
 </div>
 
 <!--MAIN CONTENT-->
-<div class="bg-ac-bg min-h-screen">
+<div class="bg-white dark:bg-ac-bg min-h-screen">
   <div class="container mx-auto px-4 py-8">
 
     <!--section (populares ahora)-->
     <div class="mb-12">
-      <h2 class="text-3xl md:text-4xl font-bold text-white border-l-4 border-ac-primary pl-3 mb-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3 mb-4">
         Populares ahora
       </h2>
       <div class="space-y-3">
         {% for movie in trending_movies|slice:":10" %}
-        <div class="group bg-[#1a1a1a] hover:bg-[#222222] rounded-xl transition-all duration-300 border border-white/5 hover:border-ac-primary/30 cursor-pointer" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
+        <div class="group bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222222] rounded-xl transition-all duration-300 border border-gray-200 dark:border-white/5 hover:border-ac-primary/30 cursor-pointer" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
           <div class="flex items-start gap-4 p-4">
 
             <!--number position-->
-            <div class="text-3xl font-bold text-gray-600 group-hover:text-ac-primary transition w-12 text-right">
+            <div class="text-3xl font-bold text-gray-400 dark:text-gray-600 group-hover:text-ac-primary transition w-12 text-right">
               #{{ forloop.counter }}
             </div>
 
             <!--miniposter-->
-            <div class="w-16 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-800 border border-transparent group-hover:border-white/10 transition">
+            <div class="w-16 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800 border border-transparent group-hover:border-white/10 transition">
               <img src="{{ movie.poster_url }}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/64x96?text=No+Image'"/>
             </div>
 
             <!--info-->
             <div class="flex-1">
               <div class="flex items-center flex-wrap gap-2 mb-1">
-                <h3 class="text-white font-bold text-lg group-hover:text-ac-primary transition">
+                <h3 class="text-gray-900 dark:text-white font-bold text-lg group-hover:text-ac-primary transition">
                   {{ movie.title }}
                 </h3>
-                <span class="text-gray-500 text-sm">{{ movie.release_date|slice:":4" }}</span>
+                <span class="text-gray-500 dark:text-gray-500 text-sm">{{ movie.release_date|slice:":4" }}</span>
               </div>
               <div class="flex items-center gap-4 mb-2 flex-wrap">
                 
                 <!--rating of the movie-->
                 <div class="flex items-center gap-1">
                   <i class="fas fa-star text-yellow-500 text-[10px]"></i>
-                  <span class="text-white font-semibold text-sm">{{ movie.vote_average|floatformat:1 }}</span>
-                  <span class="text-gray-500 text-xs">({{ movie.vote_count|default:"856" }})</span>
+                  <span class="text-gray-900 dark:text-white font-semibold text-sm">{{ movie.vote_average|floatformat:1 }}</span>
+                  <span class="text-gray-500 dark:text-gray-500 text-xs">({{ movie.vote_count|default:"856" }})</span>
                 </div>
 
                 <!--buttons-->
-                <a href="/review/nueva/{{ movie.id }}/" class="text-gray-400 hover:text-ac-primary text-sm transition" onclick="event.stopPropagation()">
+                <a href="/review/nueva/{{ movie.id }}/" class="text-gray-500 dark:text-gray-400 hover:text-ac-primary text-sm transition" onclick="event.stopPropagation()">
                   <i class="fas fa-star"></i> Puntuar
                 </a>
                 
                 <button onclick="event.stopPropagation(); addToList(this, '{{ movie.id }}', '{{ movie.title|escapejs }}')" 
-                        class="watchlist-btn {% if movie.id in mis_peliculas_ids %}added text-white !text-ac-primary{% else %}text-gray-400 hover:text-ac-primary{% endif %} text-sm transition flex items-center gap-1">
+                        class="watchlist-btn {% if movie.id in mis_peliculas_ids %}added text-gray-900 dark:text-white !text-ac-primary{% else %}text-gray-500 dark:text-gray-400 hover:text-ac-primary{% endif %} text-sm transition flex items-center gap-1">
                   <i class="fas {% if movie.id in mis_peliculas_ids %}fa-check{% else %}fa-plus{% endif %} transition-transform duration-200"></i>
                 </button>
                 
               </div>
-              <p class="text-gray-400 text-sm line-clamp-2">
+              <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
                 {{ movie.overview|truncatechars:120 }}
               </p>
             </div>
           </div>
         </div>
         {% empty %}
-        <div class="text-white text-center p-10">Cargando películas...</div>
+        <div class="text-gray-900 dark:text-white text-center p-10">Cargando películas...</div>
         {% endfor %}
       </div>
     </div>
@@ -137,12 +137,12 @@ Inicio - Reseñas de Películas
     <!--section (recent releases)-->
     <div class="mb-12">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-3xl md:text-4xl font-bold text-white border-l-4 border-ac-primary pl-3">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
           Estrenos recientes
         </h2>
 
         <!--ARREGLAR (poner que te lleve a una nueva pagina con todo)-->
-        <a href="#" class="text-ac-primary hover:text-ac-primary-dark tex-t-sm transition">Ver mas →</a>
+        <a href="#" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -171,13 +171,13 @@ Inicio - Reseñas de Películas
           </div>
 
           <div class="mt-2">
-            <h3 class="text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
+            <h3 class="text-gray-900 dark:text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
             <div class="flex items-center gap-1 mt-1 justify-between">
                 <div class="flex items-center gap-1">
                     <i class="fas fa-star text-yellow-500 text-[10px]"></i>
-                    <span class="text-gray-300 text-xs font-bold">{{ movie.vote_average|floatformat:1 }}</span>
+                    <span class="text-gray-700 dark:text-gray-300 text-xs font-bold">{{ movie.vote_average|floatformat:1 }}</span>
                 </div>
-                <span class="text-gray-500 text-[10px]">{{ movie.release_date|slice:":4" }}</span>
+                <span class="text-gray-500 dark:text-gray-500 text-[10px]">{{ movie.release_date|slice:":4" }}</span>
             </div>
           </div>
         </div>
@@ -188,7 +188,7 @@ Inicio - Reseñas de Películas
     <!--SECTION (populars) -->
     <div class="mb-12">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-3xl md:text-4xl font-bold text-white border-l-4 border-ac-primary pl-3">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
           Populares
         </h2>
 
@@ -223,15 +223,15 @@ Inicio - Reseñas de Películas
           </div>
           
           <div class="mt-2">
-            <h3 class="text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
+            <h3 class="text-gray-900 dark:text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
             <div class="flex items-center gap-1 mt-1">
               <i class="fas fa-star text-yellow-500 text-[10px]"></i>
-              <span class="text-gray-300 text-xs font-bold">{{ movie.vote_average|floatformat:1 }}</span>
+              <span class="text-gray-700 dark:text-gray-300 text-xs font-bold">{{ movie.vote_average|floatformat:1 }}</span>
             </div>
           </div>
         </div>
         {% empty %}
-        <div class="text-white text-center p-10 col-span-5">Cargando películas aleatorias...</div>
+        <div class="text-gray-900 dark:text-white text-center p-10 col-span-5">Cargando películas aleatorias...</div>
         {% endfor %}
       </div>
     </div>
@@ -239,7 +239,7 @@ Inicio - Reseñas de Películas
     <!--SECTION (top rated)-->
     <div class="mb-12">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-3xl md:text-4xl font-bold text-white border-l-4 border-ac-primary pl-3">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
           Mejor valoradas
         </h2>
 
@@ -272,13 +272,13 @@ Inicio - Reseñas de Películas
           </div>
           
           <div class="mt-2">
-            <h3 class="text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
+            <h3 class="text-gray-900 dark:text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
             
             <div class="flex items-center gap-1 mt-1 justify-between">
                 <div class="flex items-center gap-1">
                     <i class="fas fa-star text-yellow-500 text-[10px]"></i>
-                    <span class="text-gray-300 text-xs font-bold">{{ movie.vote_average|floatformat:1 }}</span>
-                    <span class="text-gray-500 text-[10px]">({{ movie.vote_count|default:"800" }})</span>
+                    <span class="text-gray-700 dark:text-gray-300 text-xs font-bold">{{ movie.vote_average|floatformat:1 }}</span>
+                    <span class="text-gray-500 dark:text-gray-500 text-[10px]">({{ movie.vote_count|default:"800" }})</span>
                 </div>
             </div>
           </div>
@@ -288,23 +288,23 @@ Inicio - Reseñas de Películas
     </div>
 
     <!--ARREGLAR O CAMBIAR (es solo una idea)-->
-    <div class="mt-8 pt-8 border-t border-white/10">
+    <div class="mt-8 pt-8 border-t border-gray-200 dark:border-white/10">
       <div class="flex flex-wrap justify-center gap-8 text-center">
         <div>
           <div class="text-2xl font-bold text-ac-primary">1.234</div>
-          <div class="text-gray-500 text-xs">Reseñas</div>
+          <div class="text-gray-500 dark:text-gray-500 text-xs">Reseñas</div>
         </div>
         <div>
           <div class="text-2xl font-bold text-ac-primary">567</div>
-          <div class="text-gray-500 text-xs">Películas</div>
+          <div class="text-gray-500 dark:text-gray-500 text-xs">Películas</div>
         </div>
         <div>
           <div class="text-2xl font-bold text-ac-primary">892</div>
-          <div class="text-gray-500 text-xs">Usuarios</div>
+          <div class="text-gray-500 dark:text-gray-500 text-xs">Usuarios</div>
         </div>
         <div>
           <div class="text-2xl font-bold text-ac-primary">8.7</div>
-          <div class="text-gray-500 text-xs">Promedio</div>
+          <div class="text-gray-500 dark:text-gray-500 text-xs">Promedio</div>
         </div>
       </div>
     </div>
@@ -383,8 +383,8 @@ Inicio - Reseñas de Películas
                     button.classList.add('!bg-ac-primary', '!text-white', '!border-ac-primary');
                     button.classList.remove('hover:bg-white', 'hover:text-black', 'bg-white/20');
                 } else {
-                    button.classList.add('!text-ac-primary', 'text-white');
-                    button.classList.remove('text-gray-400', 'hover:text-ac-primary');
+                    button.classList.add('!text-ac-primary', 'text-gray-900 dark:text-white');
+                    button.classList.remove('text-gray-500 dark:text-gray-400', 'hover:text-ac-primary');
                 }
                 
                 icon.style.transform = 'scale(1) rotate(0deg)';
@@ -401,8 +401,8 @@ Inicio - Reseñas de Películas
                     button.classList.remove('!bg-ac-primary', '!text-white', '!border-ac-primary');
                     button.classList.add('hover:bg-white', 'hover:text-black', 'bg-white/20');
                 } else {
-                    button.classList.remove('!text-ac-primary', 'text-white');
-                    button.classList.add('text-gray-400', 'hover:text-ac-primary');
+                    button.classList.remove('!text-ac-primary', 'text-gray-900 dark:text-white');
+                    button.classList.add('text-gray-500 dark:text-gray-400', 'hover:text-ac-primary');
                 }
                 
                 icon.style.transform = 'scale(1) rotate(0deg)';
