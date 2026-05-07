@@ -7,17 +7,14 @@ Inicio - Reseñas de Películas
 {% endblock %}
 
 {% block content %}
-
 <!--HERO SECTION-->
 <div class="relative w-full h-[60vh] lg:h-[70vh]">
-  {% if hero_movie %} <!--if it ixists-->
-  <img
+  {% if hero_movie %} <!--if it ixists--> <img
     src="{{ hero_movie.backdrop_url|default:'https://image.tmdb.org/t/p/original' }}{{ hero_movie.backdrop_path }}"
     alt="{{ hero_movie.title }}"
     class="absolute inset-0 w-full h-full object-cover -z-10"
     onerror="this.src='https://via.placeholder.com/1920x1080?text=No+Image'"
-  /> <!--if the image don't upload, give a text "No Image"-->
-  {% else %}
+  /> {% else %}
   <img
     src="https://via.placeholder.com/1920x1080?text=Absolute+Cinema"
     alt="Hero Background"
@@ -141,8 +138,7 @@ Inicio - Reseñas de Películas
           Estrenos recientes
         </h2>
 
-        <!--ARREGLAR (poner que te lleve a una nueva pagina con todo)-->
-        <a href="#" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
+        <a href="{% url 'movies' %}?filtro=cartelera" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -192,9 +188,7 @@ Inicio - Reseñas de Películas
           Populares
         </h2>
 
-        <a href="#" class="text-ac-primary hover:text-ac-primary-dark text-sm transition" onclick="location.reload(); return false;">
-          <i class="fas fa-sync-alt"></i> Actualizar
-        </a>
+        <a href="{% url 'movies' %}?filtro=populares" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -243,7 +237,7 @@ Inicio - Reseñas de Películas
           Mejor valoradas
         </h2>
 
-        <a href="#" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
+        <a href="{% url 'movies' %}?filtro=valoradas" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -383,8 +377,8 @@ Inicio - Reseñas de Películas
                     button.classList.add('!bg-ac-primary', '!text-white', '!border-ac-primary');
                     button.classList.remove('hover:bg-white', 'hover:text-black', 'bg-white/20');
                 } else {
-                    button.classList.add('!text-ac-primary', 'text-gray-900 dark:text-white');
-                    button.classList.remove('text-gray-500 dark:text-gray-400', 'hover:text-ac-primary');
+                    button.classList.add('!text-ac-primary', 'text-gray-900', 'dark:text-white');
+                    button.classList.remove('text-gray-500', 'dark:text-gray-400', 'hover:text-ac-primary');
                 }
                 
                 icon.style.transform = 'scale(1) rotate(0deg)';
@@ -401,8 +395,8 @@ Inicio - Reseñas de Películas
                     button.classList.remove('!bg-ac-primary', '!text-white', '!border-ac-primary');
                     button.classList.add('hover:bg-white', 'hover:text-black', 'bg-white/20');
                 } else {
-                    button.classList.remove('!text-ac-primary', 'text-gray-900 dark:text-white');
-                    button.classList.add('text-gray-500 dark:text-gray-400', 'hover:text-ac-primary');
+                    button.classList.remove('!text-ac-primary', 'text-gray-900', 'dark:text-white');
+                    button.classList.add('text-gray-500', 'dark:text-gray-400', 'hover:text-ac-primary');
                 }
                 
                 icon.style.transform = 'scale(1) rotate(0deg)';
