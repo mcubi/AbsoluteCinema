@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Configuración - Absolute Cinema
+{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-white dark:bg-ac-bg">
+  <div class="container mx-auto px-4 py-8 pt-24">
+
+    <div class="mb-8">
+      <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+        Configuración
+      </h1>
+      <p class="text-sm mt-1 text-gray-500 dark:text-gray-400">
+        Administra las opciones de tu cuenta
+      </p>
+    </div>
+
+    <!--options-->
+    <div class="space-y-1">
+      
+      <!--dark/ light-->
+      <div class="flex items-center justify-between py-3 px-0 rounded-lg transition">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center bg-ac-primary/10">
+            <i class="fas fa-moon text-sm text-ac-primary"></i>
+          </div>
+          <div>
+            <div class="font-medium text-sm text-gray-900 dark:text-white">Modo oscuro</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Alternar entre tema claro y oscuro</div>
+          </div>
+        </div>
+        <button id="theme-toggle" class="relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none bg-gray-300 dark:bg-gray-600">
+          <span id="theme-slider" class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform translate-x-1 dark:translate-x-5"></span>
+        </button>
+      </div>
+
+      <!--kids mode HACER-->
+      <div class="flex items-center justify-between py-3 px-0 rounded-lg opacity-60">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-800">
+            <i class="fas fa-child text-sm text-gray-500 dark:text-gray-400"></i>
+          </div>
+          <div>
+
+            <!--si eso borrar lo del control parental, solo es una idea. Es modo control parental o si no quieres que
+            te salgan pelis +18 idk-->
+            <div class="font-medium text-sm text-gray-900 dark:text-white">Control parental</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Restringir contenido para menores</div>
+          </div>
+        </div>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400">Próximamente</span>
+      </div>
+
+      <!--change password HACER-->
+      <div class="flex items-center justify-between py-3 px-0 rounded-lg opacity-60">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-800">
+            <i class="fas fa-key text-sm text-gray-500 dark:text-gray-400"></i>
+          </div>
+          <div>
+            <div class="font-medium text-sm text-gray-900 dark:text-white">Contraseña</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Actualiza tu contraseña</div>
+          </div>
+        </div>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400">Próximamente</span>
+      </div>
+
+      <!--delete account HACER-->
+      <div class="flex items-center justify-between py-3 px-0 rounded-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center bg-red-100 dark:bg-red-500/10">
+            <i class="fas fa-trash-alt text-sm text-red-500 dark:text-red-400"></i>
+          </div>
+          <div>
+            <div class="font-medium text-sm text-gray-900 dark:text-white">Eliminar cuenta</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Borrar permanentemente tu cuenta y datos</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  
+  function updateThemeToggle() {
+    const slider = document.getElementById('theme-slider');
+
+    // get if it's dark or light
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    if (slider) {
+      if (isDark) {
+        slider.style.transform = 'translateX(18px)';
+      } else {
+        slider.style.transform = 'translateX(2px)';
+      }
+    }
+  }
+  
+  // wait 0,05 segs
+  setTimeout(updateThemeToggle, 50);
+  
+  // the buttom to change the theme
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      if (typeof window.toggleTheme === 'function') {
+        window.toggleTheme();
+        setTimeout(updateThemeToggle, 50);
+      }
+    });
+  }
+</script>
+
+{% endblock %}
