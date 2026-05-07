@@ -104,11 +104,17 @@
             <div
               class="h-full w-full rounded-full bg-gradient-to-br from-ac-primary to-blue-600 p-[2px] cursor-pointer hover:scale-105 transition"
             >
-              <img
-                src="{% static 'img/avatar.jpg' %}"
-                alt="Perfil"
-                class="rounded-full bg-black h-full w-full object-cover"
-              />
+              {% if user.perfil.avatar %}
+                <img
+                  src="{{ user.perfil.avatar.url }}"
+                  alt="{{ user.username }}"
+                  class="rounded-full bg-black h-full w-full object-cover"
+                />
+              {% else %}
+                <div class="rounded-full bg-gray-800 h-full w-full flex items-center justify-center">
+                  <i class="fas fa-user text-white text-lg"></i>
+                </div>
+              {% endif %}
             </div>
 
             <div
@@ -123,12 +129,10 @@
                 </p>
               </div>
 
-              <a
-                href="#"
-                class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition"
-              >
+              <a href="{% url 'users:mi_perfil' %}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition">
                 <i class="fas fa-user mr-2 text-xs"></i> Mi Perfil
               </a>
+              
               <a
                 href="#"
                 class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition"
@@ -184,9 +188,9 @@
           <p class="mt-2 text-xs">&copy; 2026 Proyecto TFG - Desarrollo Web.</p>
         </div>
         <div class="flex gap-6 text-lg">
-          <a href="#" class="hover:text-ac-primary transition hover:scale-110"
-            ><i class="fab fa-github"></i
-          ></a>
+          <a href="https://github.com/mcubi/AbsoluteCinema/" target="_blank" rel="noopener noreferrer" class="hover:text-ac-primary transition hover:scale-110">
+            <i class="fab fa-github"></i>
+          </a>
           <a href="#" class="hover:text-ac-primary transition hover:scale-110"
             ><i class="fab fa-twitter"></i
           ></a>

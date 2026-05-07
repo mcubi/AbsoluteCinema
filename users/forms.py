@@ -44,3 +44,47 @@ class RegistroForm(forms.Form):
         if cleaned_data.get('password1') != cleaned_data.get('password2'):
             raise forms.ValidationError("Las contraseñas no coinciden.")
         return cleaned_data
+    
+
+# *********************************************************************************
+# form profile
+from .models import UserProfile
+
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        
+        #get the things we can edit
+        fields = ['first_name', 'last_name', 'email', 'telefono', 'avatar']
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'w-full bg-[#1a1a1a] border border-white/20 rounded-lg px-4 py-3 text-white focus:border-ac-primary focus:outline-none transition',
+                'placeholder': 'Nombre'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'w-full bg-[#1a1a1a] border border-white/20 rounded-lg px-4 py-3 text-white focus:border-ac-primary focus:outline-none transition',
+                'placeholder': 'Apellidos'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full bg-[#1a1a1a] border border-white/20 rounded-lg px-4 py-3 text-white focus:border-ac-primary focus:outline-none transition',
+                'placeholder': 'Correo electrónico'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'w-full bg-[#1a1a1a] border border-white/20 rounded-lg px-4 py-3 text-white focus:border-ac-primary focus:outline-none transition',
+                'placeholder': 'Teléfono'
+            }),
+            'avatar': forms.FileInput(attrs={
+                'class': 'w-full bg-[#1a1a1a] border border-white/20 rounded-lg px-4 py-3 text-white focus:border-ac-primary focus:outline-none transition cursor-pointer',
+                'accept': 'image/*'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # check if there is a user profile
+        if self.instance and self.instance.user:
+            self.fields['first_name'].initial = self.instance.first_name
+            self.fields['last_name'].initial = self.instance.last_name
+            self.fields['email'].initial = self.instance.email
+            self.fields['telefono'].initial = self.instance.telefono
