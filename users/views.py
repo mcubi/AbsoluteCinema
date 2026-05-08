@@ -81,10 +81,20 @@ def login_user(request):
 # user profile
 
 from django.contrib.auth.decorators import login_required
-from .forms import PerfilForm
 
 @login_required
 def mi_perfil(request):
+    perfil = request.user.perfil
+    return render(request, 'users/mi_perfil.html', {'perfil': perfil})
+
+# ***********************************************************************************+
+# config
+
+from django.contrib.auth.decorators import login_required
+from .forms import PerfilForm
+
+@login_required
+def configuracion(request):
     # get the actual user's profile
     perfil = request.user.perfil
     
@@ -93,21 +103,11 @@ def mi_perfil(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Perfil actualizado correctamente")
-            return redirect('users:mi_perfil')
+            return redirect('users:configuracion')
     else:
         form = PerfilForm(instance=perfil)
     
-    return render(request, 'users/mi_perfil.html', {
+    return render(request, 'users/configuracion.html', {
         'form': form,
         'perfil': perfil,
     })
-    
-
-# ***********************************************************************************+
-# config
-
-from django.contrib.auth.decorators import login_required
-
-@login_required
-def configuracion(request):
-    return render(request, 'users/configuracion.html')
