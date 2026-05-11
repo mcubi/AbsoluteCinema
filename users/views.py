@@ -4,10 +4,18 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import UserProfile
 from .forms import RegistroForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from .forms import PerfilForm
+import os
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
+# ***********************************************************************************+
+                                        # VIEWS
+# ***********************************************************************************+  
 
-# VIEWS
+# REGISTER
 
 def register_user(request):
     if request.method == 'POST':
@@ -55,8 +63,10 @@ def register_user(request):
 
     return render(request, 'users/register.html', {'form': form})
 
+# ***********************************************************************************+
 
-     
+# LOG IN
+
 def login_user(request):
     if request.method == 'POST':
         # Pillamos los datos que envía el formulario HTML
@@ -78,7 +88,21 @@ def login_user(request):
     return render(request, 'users/login.html')
 
 # ***********************************************************************************+
-# user profile
+
+# LOG OUT
+
+@login_required
+def user_logout(request):
+    
+    # Close sesion
+    logout(request)
+    
+    messages.success(request, "Cerraste la sesión con anterioridad")
+    return redirect('home')  # Redirige a la página principal
+
+# ***********************************************************************************+
+
+# USER PROFILE
 
 from django.contrib.auth.decorators import login_required
 
@@ -88,10 +112,9 @@ def mi_perfil(request):
     return render(request, 'users/mi_perfil.html', {'perfil': perfil})
 
 # ***********************************************************************************+
-# config
 
-from django.contrib.auth.decorators import login_required
-from .forms import PerfilForm
+# CONFIG PROFILE
+
 
 @login_required
 def configuracion(request):
@@ -111,3 +134,55 @@ def configuracion(request):
         'form': form,
         'perfil': perfil,
     })
+
+# ***********************************************************************************+
+
+# DELETING ACCOUNTS
+
+@login_required
+def delete_account(request):
+    user = request.user
+    
+    # Password verify
+    password = request.POST.get('password')
+    if not user.check_password(password):
+        messages.error(request, 'Contraseña incorrecta. No se pudo eliminar la cuenta.')
+        return redirect('users:configuracion')
+    
+    # Avatar existance checking and deletion
+    try:
+        if hasattr(user, 'perfil') and user.perfil.avatar:
+            avatar_path = user.perfil.avatar.path
+            if os.path.isfile(avatar_path):
+                os.remove(avatar_path)
+    except Exception as e:
+        print(f"Error al eliminar avatar: {e}")
+    
+    # Close session
+    logout(request)
+    
+    # Delete user ==== PROFILE will be destroyed too cause of CASCADE condition in PROFILE MODEL
+    user.delete()
+    
+    messages.success(request, 'Tu cuenta ha sido eliminada permanentemente.')
+    return redirect('home')
+
+# **************************************************************************************************+
+
+# CHANGE PASSWORD
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Actualizar la sesión para que no cierre sesión
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Tu contraseña ha sido actualizada correctamente.')
+            return redirect('users:configuracion')
+        
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    return render(request, 'users/change_password.html', {'form': form})
