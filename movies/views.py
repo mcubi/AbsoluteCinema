@@ -26,10 +26,10 @@ def home_api(request):
     if peliculas_tendencias:
         pelicula_aleatoria = random.choice(peliculas_tendencias)
         
-    # --- ¡NUEVO! SACAR LOS IDs DE TUS PELÍCULAS GUARDADAS ---
+    # Getting saved movies ID's
     mis_peliculas_ids = []
     if request.user.is_authenticated:
-        # Esto saca una lista de números con las pelis que has guardado [123, 456...]
+        
         mis_peliculas_ids = list(MiLista.objects.filter(user=request.user).values_list('movie_id', flat=True))
     
     context = {
@@ -57,9 +57,9 @@ def detalle_pelicula(request, movie_id):
     
     return render(request, 'movies/detalle.html', {'pelicula': pelicula})
 
-# --- NUEVA VISTA PARA EL CATÁLOGO DE PELÍCULAS ACTUALIZADA ---
+# Film Catalog View
 def catalogo_peliculas(request):
-    # Miramos si la URL tiene un filtro, si no, por defecto es 'populares'
+    # We check if the URL has a filter; if not, it defaults to 'popular'.
     filtro = request.GET.get('filtro', 'populares')
     
     if filtro == 'cartelera':
@@ -71,46 +71,46 @@ def catalogo_peliculas(request):
         
     return render(request, 'movies/peliculas.html', {
         'movies': peliculas,
-        'filtro_actual': filtro # Le pasamos el filtro actual al HTML para iluminar el botón
+        'filtro_actual': filtro # We pass the current filter to the HTML to highlight the button
     })
 
-# --- VISTA DE MI LISTA ACTUALIZADA ---
-@login_required # Obligamos a estar logueado para ver la lista
+# My - List view
+@login_required # U must be logged
 def mi_lista_view(request):
-    # 1. Buscamos en tu Base de Datos las pelis que has guardado
+    # 1. Search saved movies in DB
     items_guardados = MiLista.objects.filter(user=request.user).order_by('-added_at')
     
-    # 2. Por cada peli guardada, le pedimos a TMDB el póster y la info
+    # 2. For each movie saved, we ask TMDB for the poster and info
     peliculas_completas = []
     for item in items_guardados:
         detalles = get_movie_details(item.movie_id)
         if detalles:
             peliculas_completas.append(detalles)
             
-    # 3. Se las mandamos a tu diseño de 'mi_lista.html'
+    # 3. Send it to the HTML list
     return render(request, 'movies/mi_lista.html', {'mis_peliculas': peliculas_completas})
 
-# --- API PARA AÑADIR/QUITAR DE MI LISTA ---
+# Add / Quit API (movies)
 @login_required
 @require_POST
 def toggle_lista(request):
     try:
-        # Leemos los datos que nos manda tu JavaScript
+        # Read JS data
         data = json.loads(request.body)
         
-        # OJO AQUÍ: Forzamos que el ID sea un número entero (int) para evitar fallos
+        # Force ID to be an integer (to evade failures)
         movie_id = int(data.get('movie_id'))
         movie_title = data.get('movie_title')
 
-        # En vez de buscar solo la primera (.first()), cogemos TODAS las que coincidan
+        # Instead of just looking for the first one (.first()), we take ALL the matching ones
         items_lista = MiLista.objects.filter(user=request.user, movie_id=movie_id)
 
         if items_lista.exists():
-            # Si hay 1, 2 o 50 copias duplicadas por error, .delete() las extermina TODAS de golpe
+            # If there are 1, 2, or 50 duplicate copies by mistake, .delete() will delete them ALL at once.
             items_lista.delete()
             return JsonResponse({'status': 'removed'})
         else:
-            # Si no existe ninguna, la creamos
+            # Case of none, we create it
             MiLista.objects.create(
                 user=request.user,
                 movie_id=movie_id,

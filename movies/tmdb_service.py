@@ -81,7 +81,7 @@ def get_top_rated_movies():
 
 
 def get_movie_details(movie_id):
-    # ¡NUEVO! Hemos añadido ",watch/providers" al final de la URL
+    # Adding ",watch/providers" at the end of the URL
     url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers"
     response = requests.get(url)
     
@@ -106,7 +106,7 @@ def get_movie_details(movie_id):
                     director = crew_member.get('name')
                     break
         
-        # --- GÉNEROS ---
+        # --- GENDERS ---
         genres = []
         if 'genres' in data:
             for genre in data['genres']:
@@ -115,7 +115,7 @@ def get_movie_details(movie_id):
                     'name': genre.get('name'),
                 })
 
-        # --- ¡NUEVO! PLATAFORMAS DE STREAMING (ESPAÑA) ---
+        # STREAMING PLATFORM LANGUAGE -> SPANISH
         providers = []
         if 'watch/providers' in data and 'results' in data['watch/providers']:
             # Buscamos 'ES' para España (si quieres de otro país, cambia el código)
@@ -146,7 +146,7 @@ def get_movie_details(movie_id):
             'genres': genres,
             'cast': cast,
             'director': director,
-            'providers': providers, # <-- ¡AÑADIMOS LAS PLATAFORMAS AQUÍ!
+            'providers': providers, 
         }
         return movie_details
     
