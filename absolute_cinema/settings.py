@@ -24,14 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ps_m^eet7a+*g9p$qf-%6iu56$j$qiflt3x8v12#w2*gg_%&3s'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-change-me')
 
-# SECURITY WARNING: don't run with DEBUG=TRUE on in production!            <-----------------------------------------------------
-DEBUG = True
+# SECURITY WARNING: don't run with DEBUG=TRUE on in production!
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes', 'on')
 
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
-
-ALLOWED_HOSTS = []
 
 
 # APPS DEFINITION:
@@ -91,9 +90,10 @@ WSGI_APPLICATION = 'absolute_cinema.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.getenv('SQLITE_DB_PATH', str(BASE_DIR / 'db.sqlite3')),
     }
 }
+
 
 
 # PASSOWRD VALIDATION:
@@ -132,10 +132,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
 
 # DEFAULT PRIMARY KEY FIELD TYPE:
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -145,13 +147,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ============================================
 # CONFIGURATION OF THE API (TMDb)
 
-from dotenv import load_dotenv
-
-# load variables from the .env file
-load_dotenv()
-
 # API Key of the movie database (TMDb)
+# (In Docker this should be provided via environment variables)
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
+
 
 # URLs base para TMDb
 TMDB_BASE_URL = 'https://api.themoviedb.org/3'
@@ -163,4 +162,5 @@ if not TMDB_API_KEY:
     
 # for profile images
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
+
