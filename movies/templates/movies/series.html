@@ -1,0 +1,76 @@
+{% extends 'base.html' %} 
+{% load static %}
+
+{% block title %}Series - Absolute Cinema{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white dark:bg-ac-bg pt-10 px-6 pb-20">
+    <div class="max-w-[1600px] mx-auto">
+
+        <div class="flex flex-col md:flex-row justify-between items-end mb-10 border-b border-gray-200 dark:border-white/10 pb-6 animate-fade-in">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-800 dark:to-white tracking-wider mb-2 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                    CATÁLOGO DE SERIES
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Explora el contenido directamente desde TMDB</p>
+            </div>
+
+            <div class="flex gap-3 mt-6 md:mt-0 overflow-x-auto pb-2 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+    <a href="?filtro=populares" 
+       class="{% if filtro_actual == 'populares' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
+        Populares
+    </a>
+    <a href="?filtro=emision" 
+       class="{% if filtro_actual == 'emision' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
+        En Emisión
+    </a>
+    <a href="?filtro=valoradas" 
+       class="{% if filtro_actual == 'valoradas' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
+        Mejor Valoradas
+    </a>
+</div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+
+            {% for movie in movies %}
+
+<div class="group relative rounded-xl overflow-hidden cursor-pointer bg-white dark:bg-[#181818] border border-gray-200 dark:border-white/5 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:border-ac-primary/50 block" onclick="window.location.href='/serie/{{ movie.id }}/'">
+
+    <div class="aspect-[2/3] w-full relative bg-gray-100 dark:bg-[#111]">
+        {% if movie.poster_url %}
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="w-full h-full object-cover transition duration-500 group-hover:brightness-75">
+        {% else %}
+            <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-600 p-4 text-center">
+                <i class="fas fa-image text-3xl mb-2"></i>
+                <span class="text-xs uppercase font-bold">{{ movie.title }}</span>
+            </div>
+        {% endif %}
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-ac-primary rounded-full w-14 h-14 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-50 group-hover:scale-100 shadow-[0_0_20px_rgba(139,92,246,0.8)]">
+                <i class="fas fa-play text-white text-lg ml-1"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4 relative z-10 bg-white dark:bg-[#181818]">
+        <h3 class="text-gray-900 dark:text-white font-bold text-sm truncate mb-1 group-hover:text-ac-primary transition-colors">{{ movie.title }}</h3>
+        <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+            <span>{{ movie.release_date|slice:":4"|default:"N/A" }}</span> 
+            <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-black/50 px-2 py-0.5 rounded-md border border-gray-200 dark:border-white/5">
+                <i class="fas fa-star text-yellow-500 text-[10px]"></i>
+                <span class="text-gray-900 dark:text-white">{{ movie.vote_average|floatformat:1|default:"0.0" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% empty %}
+<div class="text-gray-500 dark:text-gray-400 text-center p-10 col-span-full">No se encontraron series.</div>
+{% endfor %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

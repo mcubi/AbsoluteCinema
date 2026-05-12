@@ -77,6 +77,11 @@
                class="{% if request.resolver_match.url_name == 'movies' or request.resolver_match.url_name == 'detalle_pelicula' %}text-gray-900 dark:text-white font-bold{% else %}text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %} transition duration-300">
                Películas
             </a>
+
+            <a href="{% url 'series' %}" 
+               class="{% if request.resolver_match.url_name == 'series' or request.resolver_match.url_name == 'detalle_serie' %}text-gray-900 dark:text-white font-bold{% else %}text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %} transition duration-300">
+               Series
+            </a>
             
             <a href="{% url 'mi_lista' %}" 
                class="{% if request.resolver_match.url_name == 'mi_lista' %}text-gray-900 dark:text-white font-bold{% else %}text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white{% endif %} transition duration-300">
@@ -186,7 +191,8 @@
       <div class="flex flex-col gap-4">
         <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}text-ac-primary font-bold{% else %}text-gray-900 dark:text-white hover:text-ac-primary{% endif %} transition py-2 text-lg">Inicio</a>
         <a href="{% url 'movies' %}" class="{% if request.resolver_match.url_name == 'movies' or request.resolver_match.url_name == 'detalle_pelicula' %}text-ac-primary font-bold{% else %}text-gray-900 dark:text-white hover:text-ac-primary{% endif %} transition py-2 text-lg">Películas</a>
-        <a href="#" class="text-gray-900 dark:text-white hover:text-ac-primary transition py-2 text-lg">Novedades</a>
+        
+        <a href="{% url 'series' %}" class="{% if request.resolver_match.url_name == 'series' or request.resolver_match.url_name == 'detalle_serie' %}text-ac-primary font-bold{% else %}text-gray-900 dark:text-white hover:text-ac-primary{% endif %} transition py-2 text-lg">Series</a>
         
         {% if user.is_authenticated %}
         <div class="flex flex-col gap-4">

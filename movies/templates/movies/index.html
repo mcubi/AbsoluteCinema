@@ -9,7 +9,7 @@ Inicio - Reseñas de Películas
 {% block content %}
 <!--HERO SECTION-->
 <div class="relative w-full h-[60vh] lg:h-[70vh]">
-  {% if hero_movie %} <!--if it ixists--> <img
+  {% if hero_movie %} <img
     src="{{ hero_movie.backdrop_url|default:'https://image.tmdb.org/t/p/original' }}{{ hero_movie.backdrop_path }}"
     alt="{{ hero_movie.title }}"
     class="absolute inset-0 w-full h-full object-cover -z-10"
@@ -36,6 +36,7 @@ Inicio - Reseñas de Películas
         <span class="bg-ac-primary/20 text-ac-primary border border-ac-primary/30 px-3 py-1 rounded text-xs font-bold backdrop-blur-md">
           <i class="fas fa-star text-xs"></i> {{ hero_movie.vote_average|floatformat:1 }}/10 </span>
         <span class="text-gray-600 dark:text-gray-300 text-sm">{{ hero_movie.release_date|slice:":4" }}</span>
+        <span class="text-white/50 text-xs uppercase tracking-widest font-bold">{% if hero_movie.id < 0 %}Serie TV{% else %}Película{% endif %}</span>
       </div>
 
       <!--title-->
@@ -73,11 +74,14 @@ Inicio - Reseñas de Películas
 
     <!--section (populares ahora)-->
     <div class="mb-12">
-      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3 mb-4">
-        Populares ahora
-      </h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
+            Populares ahora
+        </h2>
+        <a href="{% url 'movies' %}?filtro=populares" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
+      </div>
       <div class="space-y-3">
-        {% for movie in trending_movies|slice:":10" %}
+        {% for movie in trending_movies|slice:":5" %}
         <div class="group bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222222] rounded-xl transition-all duration-300 border border-gray-200 dark:border-white/5 hover:border-ac-primary/30 cursor-pointer" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
           <div class="flex items-start gap-4 p-4">
 
@@ -131,7 +135,38 @@ Inicio - Reseñas de Películas
       </div>
     </div>
 
-    <!--section (recent releases)-->
+    <div class="mb-12">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">Series más populares</h2>
+          <a href="{% url 'series' %}?filtro=populares" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {% for movie in series_populares|slice:":10" %}
+          <div class="group relative cursor-pointer" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
+            <div class="relative rounded-xl overflow-hidden border border-transparent hover:border-white/10 transition-all duration-300">
+              <img src="{{ movie.poster_url }}" class="w-full aspect-[2/3] object-cover" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center p-3">
+                <div class="flex gap-2 w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                    <a href="/pelicula/{{ movie.id }}/" class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white text-center py-1.5 rounded text-xs font-bold transition shadow-lg" onclick="event.stopPropagation()">
+                        Reseñas
+                    </a>
+                    <button onclick="event.stopPropagation(); addToList(this, '{{ movie.id }}', '{{ movie.title|escapejs }}')" 
+                            class="{% if movie.id in mis_peliculas_ids %}added !bg-ac-primary !text-white !border-ac-primary{% else %}bg-white/20 hover:bg-white text-white hover:text-black{% endif %} px-2.5 py-1.5 rounded text-xs transition shadow-lg">
+                      <i class="fas {% if movie.id in mis_peliculas_ids %}fa-check{% else %}fa-plus{% endif %} transition-transform duration-200"></i>
+                    </button>
+                </div>
+              </div>
+            </div>
+            <div class="mt-2">
+              <div class="flex justify-between items-start">
+                <h3 class="text-gray-900 dark:text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
     <div class="mb-12">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
@@ -183,58 +218,45 @@ Inicio - Reseñas de Películas
 
     <!--SECTION (populars) -->
     <div class="mb-12">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
-          Populares
-        </h2>
-
-        <a href="{% url 'movies' %}?filtro=populares" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {% for movie in random_movies|slice:":10" %}
-        <div class="group relative cursor-pointer" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
-          <div class="relative rounded-xl overflow-hidden border border-transparent hover:border-white/10 transition-all duration-300">
-            <img src="{{ movie.poster_url }}" class="w-full aspect-[2/3] object-cover" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'"/>
-            
-            <div class="absolute top-2 left-2 bg-ac-primary/90 rounded-lg px-2 py-1 text-xs font-bold text-white shadow-lg">
-              {{ movie.release_date|slice:":4" }}
-            </div>
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center p-3">
-              <div class="flex gap-2 w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                <a href="/pelicula/{{ movie.id }}/" class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white text-center py-1.5 rounded text-xs font-bold transition shadow-lg" onclick="event.stopPropagation()">
-                  Reseñas
-                </a>
-                
-                <button onclick="event.stopPropagation(); addToList(this, '{{ movie.id }}', '{{ movie.title|escapejs }}')" 
-                        class="{% if movie.id in mis_peliculas_ids %}added !bg-ac-primary !text-white !border-ac-primary{% else %}bg-white/20 hover:bg-white text-white hover:text-black{% endif %} px-2.5 py-1.5 rounded text-xs transition shadow-lg">
-                  <i class="fas {% if movie.id in mis_peliculas_ids %}fa-check{% else %}fa-plus{% endif %} transition-transform duration-200"></i>
-                </button>
-                
-              </div>
-            </div>
-          </div>
-          
-          <div class="mt-2">
-            <h3 class="text-gray-900 dark:text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
-            <div class="flex items-center gap-1 mt-1">
-              <i class="fas fa-star text-yellow-500 text-[10px]"></i>
-              <span class="text-gray-700 dark:text-gray-300 text-xs font-bold">{{ movie.vote_average|floatformat:1 }}</span>
-            </div>
-          </div>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">Series en Emisión</h2>
+          <a href="{% url 'series' %}?filtro=emision" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
         </div>
-        {% empty %}
-        <div class="text-gray-900 dark:text-white text-center p-10 col-span-5">Cargando películas aleatorias...</div>
-        {% endfor %}
-      </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {% for movie in series_emision|slice:":10" %}
+          <div class="group relative cursor-pointer" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
+            <div class="relative rounded-xl overflow-hidden border border-transparent hover:border-white/10 transition-all duration-300">
+                <img src="{{ movie.poster_url }}" class="w-full aspect-[2/3] object-cover" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'"/>
+                <div class="absolute top-2 left-2 bg-black/70 backdrop-blur-md rounded-lg px-2 py-1 text-xs font-bold text-white">
+                    Nº {{ forloop.counter }}
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center p-3">
+                    <div class="flex gap-2 w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <a href="/pelicula/{{ movie.id }}/" class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white text-center py-1.5 rounded text-xs font-bold transition shadow-lg" onclick="event.stopPropagation()">
+                            Reseñas
+                        </a>
+                        <button onclick="event.stopPropagation(); addToList(this, '{{ movie.id }}', '{{ movie.title|escapejs }}')" 
+                                class="{% if movie.id in mis_peliculas_ids %}added !bg-ac-primary !text-white !border-ac-primary{% else %}bg-white/20 hover:bg-white text-white hover:text-black{% endif %} px-2.5 py-1.5 rounded text-xs transition shadow-lg">
+                          <i class="fas {% if movie.id in mis_peliculas_ids %}fa-check{% else %}fa-plus{% endif %} transition-transform duration-200"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2">
+                <div class="flex justify-between items-start">
+                  <h3 class="text-gray-900 dark:text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
+                </div>
+              </div>
+          </div>
+          {% endfor %}
+        </div>
     </div>
 
     <!--SECTION (top rated)-->
     <div class="mb-12">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
-          Mejor valoradas
+          Películas Mejor Valoradas
         </h2>
 
         <a href="{% url 'movies' %}?filtro=valoradas" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
@@ -281,7 +303,41 @@ Inicio - Reseñas de Películas
       </div>
     </div>
 
-    <!--ARREGLAR O CAMBIAR (es solo una idea)-->
+    <div class="mb-12">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">Series mejor valoradas</h2>
+          <a href="{% url 'series' %}?filtro=valoradas" class="text-ac-primary hover:text-ac-primary-dark text-sm transition">Ver mas →</a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {% for movie in series_top|slice:":10" %}
+          <div class="group relative cursor-pointer" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
+            <div class="relative rounded-xl overflow-hidden border border-transparent hover:border-white/10 transition-all duration-300">
+                <img src="{{ movie.poster_url }}" class="w-full aspect-[2/3] object-cover" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'"/>
+                <div class="absolute top-2 left-2 bg-black/70 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold text-white border border-white/10 shadow-lg">
+                    {{ forloop.counter }}
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center p-3">
+                    <div class="flex gap-2 w-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <a href="/pelicula/{{ movie.id }}/" class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white text-center py-1.5 rounded text-xs font-bold transition shadow-lg" onclick="event.stopPropagation()">
+                            Reseñas
+                        </a>
+                        <button onclick="event.stopPropagation(); addToList(this, '{{ movie.id }}', '{{ movie.title|escapejs }}')" 
+                                class="{% if movie.id in mis_peliculas_ids %}added !bg-ac-primary !text-white !border-ac-primary{% else %}bg-white/20 hover:bg-white text-white hover:text-black{% endif %} px-2.5 py-1.5 rounded text-xs transition shadow-lg">
+                          <i class="fas {% if movie.id in mis_peliculas_ids %}fa-check{% else %}fa-plus{% endif %} transition-transform duration-200"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2">
+                <div class="flex justify-between items-start">
+                  <h3 class="text-gray-900 dark:text-white font-semibold text-sm line-clamp-1 group-hover:text-ac-primary transition">{{ movie.title }}</h3>
+                </div>
+              </div>
+          </div>
+          {% endfor %}
+        </div>
+    </div>
+
     <div class="mt-8 pt-8 border-t border-gray-200 dark:border-white/10">
       <div class="flex flex-wrap justify-center gap-8 text-center">
         <div>
