@@ -81,8 +81,8 @@ def get_top_rated_movies():
 
 
 def get_movie_details(movie_id):
-    # ¡NUEVO! Hemos añadido ",watch/providers" al final de la URL
-    url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers"
+    # ¡NUEVO! Hemos añadido ",videos" al final de la URL para traer los trailers
+    url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos"
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -115,7 +115,7 @@ def get_movie_details(movie_id):
                     'name': genre.get('name'),
                 })
 
-        # --- ¡NUEVO! PLATAFORMAS DE STREAMING (ESPAÑA) ---
+        # --- PLATAFORMAS DE STREAMING (ESPAÑA) ---
         providers = []
         if 'watch/providers' in data and 'results' in data['watch/providers']:
             # Buscamos 'ES' para España (si quieres de otro país, cambia el código)
@@ -128,6 +128,14 @@ def get_movie_details(movie_id):
                         'name': prov.get('provider_name'),
                         'logo_url': f"https://image.tmdb.org/t/p/original{prov.get('logo_path')}" if prov.get('logo_path') else None
                     })
+                    
+        # --- TRÁILER ---
+        trailer_key = None
+        if 'videos' in data and 'results' in data['videos']:
+            for video in data['videos']['results']:
+                if video.get('site') == 'YouTube' and video.get('type') == 'Trailer':
+                    trailer_key = video.get('key')
+                    break # Nos quedamos con el primero que encuentre
         
         movie_details = {
             'id': data.get('id'),
@@ -146,7 +154,8 @@ def get_movie_details(movie_id):
             'genres': genres,
             'cast': cast,
             'director': director,
-            'providers': providers, # <-- ¡AÑADIMOS LAS PLATAFORMAS AQUÍ!
+            'providers': providers,
+            'trailer_key': trailer_key, # <-- Añadimos la clave del vídeo aquí
         }
         return movie_details
     
@@ -154,7 +163,6 @@ def get_movie_details(movie_id):
 
 
 # for the random movies
-
 def get_random_popular_movies(limit=10):
     
     years = [2020, 2021, 2022, 2023, 2024, 2025, 2019, 2018, 2017, 2016]
@@ -185,3 +193,109 @@ def get_random_popular_movies(limit=10):
     # suffle for the movies
     random.shuffle(all_movies)
     return all_movies[:limit]
+
+
+# --- FUNCIÓN PARA SERIES ---
+def get_tv_shows(filtro='populares', page=1):
+    endpoints = {
+        'populares': 'tv/popular',
+        'valoradas': 'tv/top_rated',
+        'emision': 'tv/on_the_air'
+    }
+    
+    endpoint = endpoints.get(filtro, 'tv/popular')
+    url = f"{BASE_URL}/{endpoint}?api_key={API_KEY}&language=es-ES&page={page}"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        
+        series = data.get('results', [])[:20]
+        formatted_series = []
+        for show in series:
+            formatted_series.append({
+                'id': show['id'],
+                'title': show.get('name', 'Sin título'),
+                'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
+                'backdrop_url': BACKDROP_BASE_URL,
+                'backdrop_path': show.get('backdrop_path'),
+                'vote_average': show.get('vote_average', 0),
+                'vote_count': show.get('vote_count', 0),
+                'release_date': show.get('first_air_date', ''),
+                'overview': show.get('overview', ''),
+                'original_language': show.get('original_language', '').upper(),
+            })
+            
+        return formatted_series
+    except requests.RequestException as e:
+        print(f"Error al obtener series ({filtro}): {e}")
+        return []
+
+# --- FUNCIÓN PARA DETALLE DE SERIES ---
+def get_tv_show_details(series_id):
+    # ¡NUEVO! Hemos añadido ",videos" al final de la URL
+    url = f"{BASE_URL}/tv/{series_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        data = response.json()
+        
+        cast = []
+        if 'credits' in data and 'cast' in data['credits']:
+            for actor in data['credits']['cast'][:12]:
+                cast.append({
+                    'name': actor.get('name'),
+                    'character': actor.get('character'),
+                    'profile_path': actor.get('profile_path'),
+                })
+        
+        director = None
+        if 'created_by' in data and len(data['created_by']) > 0:
+            director = data['created_by'][0].get('name')
+        
+        genres = []
+        if 'genres' in data:
+            for genre in data['genres']:
+                genres.append({'id': genre.get('id'), 'name': genre.get('name')})
+
+        providers = []
+        if 'watch/providers' in data and 'results' in data['watch/providers']:
+            es_data = data['watch/providers']['results'].get('ES', {})
+            if 'flatrate' in es_data:
+                for prov in es_data['flatrate']:
+                    providers.append({
+                        'name': prov.get('provider_name'),
+                        'logo_url': f"https://image.tmdb.org/t/p/original{prov.get('logo_path')}" if prov.get('logo_path') else None
+                    })
+                    
+        # --- TRÁILER ---
+        trailer_key = None
+        if 'videos' in data and 'results' in data['videos']:
+            for video in data['videos']['results']:
+                if video.get('site') == 'YouTube' and video.get('type') == 'Trailer':
+                    trailer_key = video.get('key')
+                    break
+        
+        movie_details = {
+            'id': data.get('id'),
+            'title': data.get('name'),
+            'tagline': data.get('tagline'),
+            'overview': data.get('overview'),
+            'poster_path': data.get('poster_path'),
+            'backdrop_path': data.get('backdrop_path'),
+            'poster_url': f"{POSTER_BASE_URL}{data['poster_path']}" if data.get('poster_path') else None,
+            'backdrop_url': BACKDROP_BASE_URL,
+            'vote_average': data.get('vote_average', 0),
+            'vote_count': data.get('vote_count', 0),
+            'release_date': data.get('first_air_date', ''),
+            'runtime': data.get('episode_run_time', [0])[0] if data.get('episode_run_time') else 0,
+            'original_language': data.get('original_language', '').upper(),
+            'genres': genres,
+            'cast': cast,
+            'director': director,
+            'providers': providers,
+            'trailer_key': trailer_key, # <-- Añadimos la clave del vídeo aquí
+        }
+        return movie_details
+    return None
