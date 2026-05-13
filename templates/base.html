@@ -240,36 +240,99 @@
 
     <script>
       // *************************************************
-      // dark/ light mode
-      
-      // when you recharge it's saved
+      // Lógica de Dark/Light Mode
       const savedTheme = localStorage.getItem('theme');
-
-      // to put the light mode
       if (savedTheme === 'light') {
         document.documentElement.classList.remove('dark');
-
-        // to put the light mode
-      } else if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-
-        // if it isn't any saved color
-      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      } else if (savedTheme === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
       }
       
       // global
       window.toggleTheme = function() {
-
         if (document.documentElement.classList.contains('dark')) {
           document.documentElement.classList.remove('dark');
           localStorage.setItem('theme', 'light');
         } else {
-
           document.documentElement.classList.add('dark');
           localStorage.setItem('theme', 'dark');
         }
       }
+
+      // *************************************************
+      // Lógica Global para "Mi Lista" (Añadir/Quitar)
+      function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+              const cookies = document.cookie.split(';');
+              for (let i = 0; i < cookies.length; i++) {
+                  const cookie = cookies[i].trim();
+                  if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+
+      window.addToList = function(button, movieId, movieTitle) {
+        const icon = button.querySelector('i');
+        button.style.pointerEvents = 'none';
+        const csrftoken = getCookie('csrftoken');
+
+        fetch('/api/toggle-lista/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken 
+            },
+            body: JSON.stringify({'movie_id': movieId, 'movie_title': movieTitle})
+        })
+        .then(response => {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) return response.json();
+            throw new Error('No logueado');
+        })
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+
+            icon.style.transform = 'scale(0) rotate(90deg)';
+            
+            setTimeout(() => {
+                const isAdded = data.status === 'added';
+                
+                // 1. Cambiar icono
+                icon.classList.replace(isAdded ? 'fa-plus' : 'fa-check', isAdded ? 'fa-check' : 'fa-plus');
+                
+                // 2. Lógica de estilos (Detectamos qué tipo de botón es)
+                if (button.classList.contains('watchlist-btn')) {
+                    // Estilo para la lista de Populares del Index
+                    button.classList.toggle('text-ac-primary', isAdded);
+                    button.classList.toggle('text-gray-500', !isAdded);
+                } else if (button.classList.contains('w-[52px]')) {
+                    // Estilo para el botón grande de Detalle.html
+                    button.classList.toggle('!bg-ac-primary', isAdded);
+                    button.classList.toggle('!text-white', isAdded);
+                    button.classList.toggle('!border-ac-primary', isAdded);
+                } else {
+                    // Estilo para los botones flotantes de los Catálogos
+                    button.classList.toggle('bg-ac-primary', isAdded);
+                    button.classList.toggle('border-ac-primary', isAdded);
+                    button.classList.toggle('bg-black/50', !isAdded);
+                    button.classList.toggle('border-white/20', !isAdded);
+                }
+
+                icon.style.transform = 'scale(1) rotate(0deg)';
+                button.style.pointerEvents = 'auto';
+                button.title = isAdded ? "Quitar de mi lista" : "Añadir a mi lista";
+            }, 150);
+        })
+        .catch(error => {
+            button.style.pointerEvents = 'auto';
+            alert("Inicia sesión para guardar en tu lista.");
+        });
+      };
 
       // *************************************************
       // Lógica del Menú Móvil
@@ -289,14 +352,6 @@
             closeButton.addEventListener('click', () => {
                 menuPanel.classList.remove('translate-x-0');
                 menuPanel.classList.add('translate-x-full');
-            });
-
-            // Cerrar si se hace clic en el fondo oscuro
-            menuPanel.addEventListener('click', (e) => {
-                if (e.target === menuPanel) {
-                    menuPanel.classList.remove('translate-x-0');
-                    menuPanel.classList.add('translate-x-full');
-                }
             });
         }
       });

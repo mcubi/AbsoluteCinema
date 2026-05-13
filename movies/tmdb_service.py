@@ -296,6 +296,8 @@ def get_tv_show_details(series_id):
             'director': director,
             'providers': providers,
             'trailer_key': trailer_key, # <-- Añadimos la clave del vídeo aquí
+            'number_of_seasons': data.get('number_of_seasons'),   # <-- TEMPORADAS
+            'number_of_episodes': data.get('number_of_episodes'), # <-- EPISODIOS
         }
         return movie_details
     return None

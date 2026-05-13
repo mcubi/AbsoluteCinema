@@ -67,20 +67,28 @@
             {% if pelicula.id < 0 %}Serie TV{% else %}Película{% endif %}
           </span>
           <span class="text-ac-primary">•</span>
+          
           <span class="text-gray-600 dark:text-gray-300">{{ pelicula.release_date|slice:":4"|default:"N/A" }}</span>
+          
           <span class="text-ac-primary">•</span>
-          <span class="text-gray-600 dark:text-gray-300">{{ pelicula.runtime|default:"0" }} min</span>
+          <span class="text-gray-600 dark:text-gray-300">
+            {% if pelicula.id < 0 %}
+                {{ pelicula.number_of_seasons|default:"?" }} Temp. ({{ pelicula.number_of_episodes|default:"?" }} Eps.)
+            {% else %}
+                {{ pelicula.runtime|default:"0" }} min
+            {% endif %}
+          </span>
+          
           <span class="text-ac-primary">•</span>
           <span class="text-gray-600 dark:text-gray-300 uppercase">{{ pelicula.original_language }}</span>
         </div>
-        
         {% if pelicula.tagline %}
         <p class="text-ac-primary font-medium italic text-lg mb-6 border-l-2 border-ac-primary pl-3">{{ pelicula.tagline }}</p>
         {% endif %}
         
         <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">Sinopsis</h2>
         <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8 max-w-4xl font-light">
-          {{ pelicula.overview|default:"Sin sinopsis disponible en español para esta película." }}
+          {{ pelicula.overview|default:"Sin sinopsis disponible en español." }}
         </p>
         
         <div class="flex flex-wrap gap-6 mb-8 border-b border-gray-200 dark:border-white/10 pb-2">
@@ -182,72 +190,4 @@
   </div>
 </div>
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-              const cookie = cookies[i].trim();
-              if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
-          }
-      }
-      return cookieValue;
-  }
-
-  // url
-  function addToList(button, movieId, movieTitle) {
-    const icon = button.querySelector('i');
-    button.style.pointerEvents = 'none';
-    const csrftoken = getCookie('csrftoken');
-
-    fetch('/api/toggle-lista/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken 
-        },
-        body: JSON.stringify({'movie_id': movieId, 'movie_title': movieTitle})
-    })
-    .then(response => {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) return response.json();
-        else throw new Error('No logueado');
-    })
-    .then(data => {
-        if (data.error) throw new Error(data.error);
-
-        // modificar si eso
-        if (data.status === 'added') {
-            icon.style.transform = 'scale(0) rotate(90deg)';
-            setTimeout(() => {
-                icon.classList.replace('fa-plus', 'fa-check');
-                button.classList.add('added', '!bg-ac-primary', '!text-white', '!border-ac-primary');
-                button.classList.remove('bg-gray-100', 'dark:bg-[#181818]', 'text-gray-900', 'dark:text-white', 'border-gray-200', 'dark:border-white/10');
-                icon.style.transform = 'scale(1) rotate(0deg)';
-                button.style.pointerEvents = 'auto';
-            }, 150);
-        } else {
-            icon.style.transform = 'scale(0) rotate(-90deg)';
-            setTimeout(() => {
-                icon.classList.replace('fa-check', 'fa-plus');
-                button.classList.remove('added', '!bg-ac-primary', '!text-white', '!border-ac-primary');
-                button.classList.add('bg-gray-100', 'dark:bg-[#181818]', 'text-gray-900', 'dark:text-white', 'border-gray-200', 'dark:border-white/10');
-                icon.style.transform = 'scale(1) rotate(0deg)';
-                button.style.pointerEvents = 'auto';
-            }, 150);
-        }
-    })
-    .catch(error => {
-        button.style.pointerEvents = 'auto';
-        alert("Inicia sesión para guardar en tu lista.");
-    });
-  }
-</script>
 {% endblock %}
