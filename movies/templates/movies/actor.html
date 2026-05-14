@@ -12,7 +12,6 @@
 
     <div class="flex flex-col md:flex-row gap-8 mb-8">
       
-      <!--photo of the actor-->
       <div class="md:w-1/3 lg:w-1/4">
         <div class="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.2)]">
           {% if persona.profile_url %}
@@ -25,15 +24,12 @@
         </div>
       </div>
       
-      <!--INFO OF THE ACTOR-->
       <div class="md:w-2/3 lg:w-3/4 text-gray-900 dark:text-white">
 
-        <!--name-->
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-brand tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-700 dark:to-gray-300 mb-4">
           {{ persona.name }}
         </h1>
         
-        <!--info-->
         <div class="flex items-center gap-3 flex-wrap mb-6 text-sm font-semibold">
           <span class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">
             {{ persona.known_for_department }}
@@ -57,7 +53,6 @@
           {% endif %}
         </div>
         
-        <!--biografy-->
         <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">Biografía</h2>
         <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8">
           {% if persona.biography %}
@@ -70,7 +65,6 @@
       </div>
     </div>
     
-    <!--movies they are in-->
     {% if persona.filmography %}
     <div class="mb-10 mt-4">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">
@@ -78,32 +72,65 @@
         <span class="text-sm text-gray-500 font-normal ml-2">{{ persona.filmography|length }} títulos</span>
       </h2>
       
-      <div class="flex overflow-x-auto gap-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-        {% for pelicula in persona.filmography %}
-        <div class="text-center min-w-[120px] group cursor-pointer" onclick="window.location.href='/pelicula/{{ pelicula.id }}/'">
-          <div class="w-24 h-36 rounded-lg bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300">
-            {% if pelicula.poster_url %}
-              <img src="{{ pelicula.poster_url }}" alt="{{ pelicula.title }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-            {% else %}
-              <div class="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
-                <i class="fas fa-film text-2xl"></i>
-              </div>
-            {% endif %}
-          </div>
-          <p class="font-semibold text-gray-900 dark:text-white text-xs group-hover:text-ac-primary transition line-clamp-2">{{ pelicula.title }}</p>
-          {% if pelicula.character %}
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate" title="{{ pelicula.character }}">
-            como {{ pelicula.character|truncatechars:20 }}
-          </p>
-          {% endif %}
-          <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">{{ pelicula.release_date|slice:":4"|default:"—" }}</p>
+      <div class="relative group/slider">
+        
+        <div class="hidden md:flex absolute left-0 top-0 h-36 w-32 bg-gradient-to-r from-white dark:from-ac-bg via-white/80 dark:via-ac-bg/80 to-transparent z-10 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-none items-center justify-start pl-2">
+            <button onclick="scrollFilmography(-1)" class="pointer-events-auto bg-black/80 hover:bg-ac-primary text-white w-10 h-10 flex items-center justify-center rounded-full transition shadow-[0_0_15px_rgba(0,0,0,0.5)] cursor-pointer">
+                <i class="fas fa-chevron-left"></i>
+            </button>
         </div>
-        {% endfor %}
+        
+        <div class="hidden md:flex absolute right-0 top-0 h-36 w-32 bg-gradient-to-l from-white dark:from-ac-bg via-white/80 dark:via-ac-bg/80 to-transparent z-10 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-none items-center justify-end pr-2">
+            <button onclick="scrollFilmography(1)" class="pointer-events-auto bg-black/80 hover:bg-ac-primary text-white w-10 h-10 flex items-center justify-center rounded-full transition shadow-[0_0_15px_rgba(0,0,0,0.5)] cursor-pointer">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div id="filmography-slider" class="flex overflow-x-auto gap-4 pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+          {% for pelicula in persona.filmography %}
+          
+          <div class="text-center min-w-[120px] w-[120px] shrink-0 group cursor-pointer" 
+               {% if pelicula.media_type == 'tv' %}
+               onclick="window.location.href='/serie/{{ pelicula.id }}/'"
+               {% else %}
+               onclick="window.location.href='/pelicula/{{ pelicula.id }}/'"
+               {% endif %}>
+               
+            <div class="w-full h-36 rounded-lg bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300">
+              {% if pelicula.poster_url %}
+                <img src="{{ pelicula.poster_url }}" alt="{{ pelicula.title }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+              {% else %}
+                <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-600 p-2">
+                  <i class="fas fa-film text-2xl mb-1"></i>
+                </div>
+              {% endif %}
+            </div>
+            <p class="font-semibold text-gray-900 dark:text-white text-xs group-hover:text-ac-primary transition line-clamp-2">{{ pelicula.title }}</p>
+            {% if pelicula.character %}
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate" title="{{ pelicula.character }}">
+              como {{ pelicula.character }}
+            </p>
+            {% endif %}
+            <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1">{{ pelicula.release_date|slice:":4"|default:"—" }}</p>
+          </div>
+          
+          {% endfor %}
+          
+          <div class="shrink-0 w-2 md:hidden"></div>
+        </div>
+        
       </div>
     </div>
     {% endif %}
     
   </div>
 </div>
+
+<script>
+  function scrollFilmography(direction) {
+      const slider = document.getElementById('filmography-slider');
+      const scrollAmount = 600; // Desplaza aproximadamente 4 o 5 películas de golpe
+      slider.scrollBy({ left: scrollAmount * direction, behavior: 'smooth' });
+  }
+</script>
 
 {% endblock %}

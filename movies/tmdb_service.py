@@ -357,9 +357,11 @@ def get_person_details(person_id):
         if 'combined_credits' in data and 'cast' in data['combined_credits']:
             # the newest to the oldest
             peliculas = data['combined_credits']['cast']
-            peliculas.sort(key=lambda x: x.get('release_date', ''), reverse=True)
+            # Un pequeño fix para que ordene bien tanto pelis como series
+            peliculas.sort(key=lambda x: x.get('release_date', '') or x.get('first_air_date', ''), reverse=True)
             
-            for pelicula in peliculas[:20]:  # only 20
+            # ¡MAGIA! Quitamos el [:20] para que cargue TODA la filmografía
+            for pelicula in peliculas:  
                 filmografia.append({
                     'id': pelicula.get('id'),
                     'title': pelicula.get('title') or pelicula.get('name', 'Sin título'),
