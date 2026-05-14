@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies, get_tv_shows, get_tv_show_details
+from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies, get_tv_shows, get_tv_show_details, get_person_details
 from .models import MiLista
 
 # HOMEPAGE FUNCTION 
@@ -200,4 +200,20 @@ def detalle_serie(request, series_id):
     return render(request, 'movies/detalle.html', {
         'pelicula': serie,
         'mis_peliculas_ids': mis_peliculas_ids
+    })
+    
+# details of the actor
+def detalle_actor(request, person_id):
+    """
+    Vista para mostrar los detalles de un actor o persona
+    """
+    person_id = int(person_id)
+    persona = get_person_details(person_id)
+    
+    if not persona:
+        from django.http import Http404
+        raise Http404("Persona no encontrada")
+    
+    return render(request, 'movies/actor.html', {
+        'persona': persona,
     })

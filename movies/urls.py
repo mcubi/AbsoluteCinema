@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/toggle-lista/', views.toggle_lista, name='toggle_lista'),
     path('series/', views.catalogo_series, name='series'),
     path('serie/<str:series_id>/', views.detalle_serie, name='detalle_serie'),
+    path('actor/<int:person_id>/', views.detalle_actor, name='detalle_actor'),
 ]

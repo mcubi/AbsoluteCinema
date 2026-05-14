@@ -7,17 +7,21 @@
 
 {% block content %}
 
+<!--MAIN CONTAINER-->
 <div class="bg-white dark:bg-ac-bg min-h-screen">
   <div class="container mx-auto px-4 py-8 pt-24">
 
+    <!--to return to the main menu-->
     <div class="mb-6">
       <a href="javascript:history.back()" class="text-gray-500 dark:text-gray-400 hover:text-ac-primary transition text-sm flex items-center gap-2 w-fit">
         <i class="fas fa-arrow-left"></i> Volver atrás
       </a>
     </div>
 
+    <!--MOVIE HEADER SECTION-->
     <div class="flex flex-col md:flex-row gap-8 mb-8">
       
+      <!--poster column-->
       <div class="md:w-1/4">
         
         <div class="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.2)]">
@@ -28,6 +32,7 @@
           />
         </div>
         
+        <!--for the trailer  ARREGLAR-->
         <div class="mt-4 flex gap-2">
           <a href="https://www.youtube.com/results?search_query={{ pelicula.title|urlencode }}+trailer+oficial+español" target="_blank" rel="noopener noreferrer" class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white px-4 py-3 rounded-lg font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition hover:-translate-y-1 flex items-center justify-center gap-2">
             <i class="fas fa-play"></i> VER TRÁILER
@@ -39,6 +44,7 @@
           </button>
         </div>
         
+        <!--streaming info-->
         <div class="mt-6 text-center bg-gray-100 dark:bg-[#181818] rounded-xl p-4 border border-gray-200 dark:border-white/5">
           <p class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-3">DISPONIBLE EN</p>
           <div class="flex items-center justify-center flex-wrap gap-3">
@@ -55,13 +61,16 @@
           </div>
         </div>
 
+      <!--info-->
       </div> 
       <div class="md:w-3/4 text-gray-900 dark:text-white">
 
+        <!--Title and badges-->
         <h1 class="text-4xl md:text-6xl font-brand tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-700 dark:to-gray-300 mb-2">
             {{ pelicula.title }}
         </h1>
         
+        <!--Serie/TV badge and details-->
         <div class="flex items-center gap-3 flex-wrap mb-6 text-sm font-semibold">
           <span class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">
             {% if pelicula.id < 0 %}Serie TV{% else %}Película{% endif %}
@@ -82,20 +91,25 @@
           <span class="text-ac-primary">•</span>
           <span class="text-gray-600 dark:text-gray-300 uppercase">{{ pelicula.original_language }}</span>
         </div>
+        
+        <!--Tagline-->
         {% if pelicula.tagline %}
         <p class="text-ac-primary font-medium italic text-lg mb-6 border-l-2 border-ac-primary pl-3">{{ pelicula.tagline }}</p>
         {% endif %}
         
+        <!--Synopsis-->
         <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">Sinopsis</h2>
         <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8 max-w-4xl font-light">
           {{ pelicula.overview|default:"Sin sinopsis disponible en español." }}
         </p>
         
+        <!--tabs-->
         <div class="flex flex-wrap gap-6 mb-8 border-b border-gray-200 dark:border-white/10 pb-2">
           <a href="#" class="text-ac-primary border-b-2 border-ac-primary pb-2 text-sm font-bold uppercase tracking-wider">Info Principal</a>
           <a href="#reviews" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-bold uppercase tracking-wider">Reseñas</a>
         </div>
         
+        <!--RATING SECTION-->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
             <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">NOTA TMDB</div>
@@ -106,6 +120,7 @@
             <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ pelicula.vote_count }} votos</div>
           </div>
           
+          <!--User rating ARREGLAR (marcos haz una funcion de puntuar pls)-->
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
             <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">TU PUNTUACIÓN</div>
             <a href="#" class="flex flex-col items-center justify-center gap-1 group cursor-pointer">
@@ -114,6 +129,7 @@
             </a>
           </div>
           
+          <!--Status-->
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
             <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">ESTADO</div>
             <div class="text-2xl font-bold text-ac-primary mt-1">
@@ -125,12 +141,14 @@
       </div>
     </div> 
     
+    <!--CAST SECTION-->
     {% if pelicula.cast %}
     <div class="mb-10 mt-4">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Reparto y equipo</h2>
       <div class="flex overflow-x-auto gap-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
         {% for actor in pelicula.cast|slice:":12" %}
-        <div class="text-center min-w-[100px] group">
+        
+        <div class="text-center min-w-[100px] group cursor-pointer" onclick="window.location.href='/actor/{{ actor.id }}/'">
           <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300">
             {% if actor.profile_path %}
             <img src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}" alt="{{ actor.name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500"/>
@@ -148,6 +166,7 @@
     </div>
     {% endif %}
     
+    <!--DIRECTOR-->
     {% if pelicula.director %}
     <div class="mb-8">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 border-l-4 border-ac-primary pl-3">Director</h2>
@@ -155,6 +174,7 @@
     </div>
     {% endif %}
     
+    <!--GENRES-->
     <div class="mb-12">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Géneros</h2>
       <div class="flex flex-wrap gap-2">
@@ -164,6 +184,7 @@
       </div>
     </div>
     
+    <!--USER REVIEWS SECTION (ARREGLAR, GONZALO O ALEJANDRO)-->
     <div id="reviews" class="mb-12">
       <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-white/10 pb-4">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
@@ -175,6 +196,7 @@
         </a>
       </div>
       
+      <!--individual reviews-->
       {% for review in reviews %}
       {% empty %}
       <div class="text-center py-16 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/5">
