@@ -11,7 +11,7 @@
   <div class="container mx-auto px-4 py-8 pt-24">
 
     <div class="flex flex-col md:flex-row gap-8 mb-8">
-      
+      <!--photo of the actor-->
       <div class="md:w-1/3 lg:w-1/4">
         <div class="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.2)]">
           {% if persona.profile_url %}
@@ -23,13 +23,13 @@
           {% endif %}
         </div>
       </div>
-      
+      <!--INFO OF THE ACTOR-->
       <div class="md:w-2/3 lg:w-3/4 text-gray-900 dark:text-white">
-
+        <!--name-->
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-brand tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-700 dark:to-gray-300 mb-4">
           {{ persona.name }}
         </h1>
-        
+        <!--info-->
         <div class="flex items-center gap-3 flex-wrap mb-6 text-sm font-semibold">
           <span class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">
             {{ persona.known_for_department }}
@@ -52,7 +52,7 @@
           </span>
           {% endif %}
         </div>
-        
+        <!--biografy-->
         <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">Biografía</h2>
         <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8">
           {% if persona.biography %}
@@ -64,7 +64,7 @@
 
       </div>
     </div>
-    
+    <!--movies they are in-->
     {% if persona.filmography %}
     <div class="mb-10 mt-4">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">
