@@ -9,7 +9,7 @@ POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500"
 BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/original"
 
 def get_popular_movies():
-    url = f"{BASE_URL}/movie/popular?api_key={API_KEY}&language=es-ES&page=1"
+    url = f"{BASE_URL}/movie/popular?api_key={API_KEY}&language=es-ES&page=1&include_adult=false"
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -33,7 +33,7 @@ def get_popular_movies():
 
 
 def get_now_playing_movies():
-    url = f"{BASE_URL}/movie/now_playing?api_key={API_KEY}&language=es-ES&page=1"
+    url = f"{BASE_URL}/movie/now_playing?api_key={API_KEY}&language=es-ES&page=1&include_adult=false"
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -57,7 +57,7 @@ def get_now_playing_movies():
 
 
 def get_top_rated_movies():
-    url = f"{BASE_URL}/movie/top_rated?api_key={API_KEY}&language=es-ES&page=1"
+    url = f"{BASE_URL}/movie/top_rated?api_key={API_KEY}&language=es-ES&page=1&include_adult=false"
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -80,19 +80,54 @@ def get_top_rated_movies():
     return []
 
 
+def filtrar_por_certificacion(peliculas):
+    
+    peliculas_filtradas = []
+    
+    for pelicula in peliculas:
+        movie_id = pelicula['id']
+        # call to obtain movies certifications
+        url = f"{BASE_URL}/movie/{movie_id}/release_dates?api_key={API_KEY}"
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            certificaciones = data.get('results', [])
+            
+            # search the spanish certification
+            certificacion_x = False
+            for pais in certificaciones:
+                if pais.get('iso_3166_1') == 'ES':
+                    for release in pais.get('release_dates', []):
+                        if release.get('certification') == 'X':
+                            certificacion_x = True
+                            break
+                    break
+            
+            # if it has not an x certification, we keep it
+            if not certificacion_x:
+                peliculas_filtradas.append(pelicula)
+        else:
+            
+            peliculas_filtradas.append(pelicula)
+    
+    return peliculas_filtradas
+
+
 def get_movie_details(movie_id):
-    # ¡NUEVO! Hemos añadido ",videos" al final de la URL para traer los trailers
-    url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos"
+    # Hemos añadido ",videos" al final de la URL para traer los trailers
+    url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos&include_adult=false"
     response = requests.get(url)
     
     if response.status_code == 200:
         data = response.json()
         
-        # --- CAST ---
+        # CAST
         cast = []
         if 'credits' in data and 'cast' in data['credits']:
             for actor in data['credits']['cast'][:12]:
                 cast.append({
+                    'id': actor.get('id'),  # id actor
                     'name': actor.get('name'),
                     'character': actor.get('character'),
                     'profile_path': actor.get('profile_path'),
@@ -171,7 +206,7 @@ def get_random_popular_movies(limit=10):
     all_movies = []
     
     for year in random_years:
-        url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&sort_by=popularity.desc&primary_release_year={year}&page=1"
+        url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&sort_by=popularity.desc&primary_release_year={year}&page=1&include_adult=false"
         response = requests.get(url)
         
         if response.status_code == 200:
@@ -192,6 +227,10 @@ def get_random_popular_movies(limit=10):
     
     # suffle for the movies
     random.shuffle(all_movies)
+    
+    # Filter movies with X certification
+    all_movies = filtrar_por_certificacion(all_movies)
+    
     return all_movies[:limit]
 
 
@@ -204,7 +243,7 @@ def get_tv_shows(filtro='populares', page=1):
     }
     
     endpoint = endpoints.get(filtro, 'tv/popular')
-    url = f"{BASE_URL}/{endpoint}?api_key={API_KEY}&language=es-ES&page={page}"
+    url = f"{BASE_URL}/{endpoint}?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
     
     try:
         response = requests.get(url)
@@ -235,7 +274,7 @@ def get_tv_shows(filtro='populares', page=1):
 # --- FUNCIÓN PARA DETALLE DE SERIES ---
 def get_tv_show_details(series_id):
     # ¡NUEVO! Hemos añadido ",videos" al final de la URL
-    url = f"{BASE_URL}/tv/{series_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos"
+    url = f"{BASE_URL}/tv/{series_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos&include_adult=false"
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -245,6 +284,7 @@ def get_tv_show_details(series_id):
         if 'credits' in data and 'cast' in data['credits']:
             for actor in data['credits']['cast'][:12]:
                 cast.append({
+                    'id': actor.get('id'),  # actor id
                     'name': actor.get('name'),
                     'character': actor.get('character'),
                     'profile_path': actor.get('profile_path'),
@@ -300,4 +340,68 @@ def get_tv_show_details(series_id):
             'number_of_episodes': data.get('number_of_episodes'), # <-- EPISODIOS
         }
         return movie_details
+    return None
+
+# ******************************************************************************************************************
+
+# details of the actor
+def get_person_details(person_id):
+    url = f"{BASE_URL}/person/{person_id}?api_key={API_KEY}&language=es-ES&append_to_response=combined_credits"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        data = response.json()
+        
+        # movies they worked in
+        filmografia = []
+        if 'combined_credits' in data and 'cast' in data['combined_credits']:
+            # the newest to the oldest
+            peliculas = data['combined_credits']['cast']
+            peliculas.sort(key=lambda x: x.get('release_date', ''), reverse=True)
+            
+            for pelicula in peliculas[:20]:  # only 20
+                filmografia.append({
+                    'id': pelicula.get('id'),
+                    'title': pelicula.get('title') or pelicula.get('name', 'Sin título'),
+                    'poster_url': f"{POSTER_BASE_URL}{pelicula.get('poster_path')}" if pelicula.get('poster_path') else None,
+                    'character': pelicula.get('character', ''),
+                    'release_date': pelicula.get('release_date', '') or pelicula.get('first_air_date', ''),
+                    'vote_average': pelicula.get('vote_average', 0),
+                    'media_type': pelicula.get('media_type', 'movie'),  # movie or tv
+                })
+        
+        # what they do
+        known_for_department = data.get('known_for_department', 'Actuación')
+        
+        # to spanish
+        dept_traducciones = {
+            'Acting': 'Actuación',
+            'Directing': 'Dirección',
+            'Production': 'Producción',
+            'Writing': 'Guion',
+            'Editing': 'Montaje',
+            'Camera': 'Fotografía',
+            'Sound': 'Sonido',
+            'Art': 'Dirección de arte',
+            'Costume & Make-Up': 'Vestuario y maquillaje',
+            'Visual Effects': 'Efectos visuales',
+            'Crew': 'Equipo técnico',
+            'Creator': 'Creador'
+        }
+        departamento = dept_traducciones.get(known_for_department, known_for_department)
+        
+        person_details = {
+            'id': data.get('id'),
+            'name': data.get('name'),
+            'biography': data.get('biography', 'No hay biografía disponible en español.'),
+            'birthday': data.get('birthday'),
+            'place_of_birth': data.get('place_of_birth'),
+            'deathday': data.get('deathday'),
+            'profile_path': data.get('profile_path'),
+            'profile_url': f"{POSTER_BASE_URL}{data['profile_path']}" if data.get('profile_path') else None,
+            'known_for_department': departamento,
+            'popularity': data.get('popularity', 0),
+            'filmography': filmografia,
+        }
+        return person_details
     return None
