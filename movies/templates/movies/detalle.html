@@ -174,24 +174,70 @@
       <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-white/10 pb-4">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
           Reseñas de usuarios
-          <span class="text-sm text-gray-500 font-normal ml-2">{{ reviews|length }} reseñas</span>
+          <span id="review-count" class="text-sm text-gray-500 font-normal ml-2">0 reseñas</span>
         </h2>
-        <a href="#" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+        {% if user.is_authenticated %}
+        <button onclick="toggleReviewForm()" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
             <i class="fas fa-pen"></i> Escribir Reseña
-        </a>
+        </button>
+        {% else %}
+        <button onclick="redirectToRegister()" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+            <i class="fas fa-pen"></i> Escribir Reseña
+        </button>
+        {% endif %}
       </div>
       
-      <!--individual reviews-->
-      {% for review in reviews %}
-      {% empty %}
-      <div class="text-center py-16 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/5">
-        <i class="fas fa-comment-slash text-5xl text-gray-400 dark:text-gray-600 mb-4"></i>
-        <p class="text-gray-500 dark:text-gray-400 mb-4">No hay reseñas todavía</p>
-        <a href="#" class="inline-block bg-ac-primary hover:bg-ac-primary-dark text-white px-6 py-2 rounded-lg text-sm transition font-semibold">
-          <i class="fas fa-pen"></i> Sé el primero en reseñar
-        </a>
+      <!-- Formulario para añadir reseña -->
+      <div id="review-form" class="hidden mb-8 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl p-6 border border-gray-200 dark:border-white/5">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Escribe tu reseña</h3>
+        <form id="review-form-element" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puntuación</label>
+            <div class="flex gap-2" id="rating-stars">
+              <button type="button" onclick="setRating(1)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" onclick="setRating(2)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" onclick="setRating(3)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" onclick="setRating(4)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" onclick="setRating(5)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition">
+                <i class="fas fa-star"></i>
+              </button>
+            </div>
+            <input type="hidden" id="rating" name="rating" value="0" required>
+          </div>
+          
+          <div>
+            <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tu reseña</label>
+            <textarea id="content" name="content" rows="4" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-ac-primary focus:border-transparent dark:bg-[#2a2a2a] dark:text-white" placeholder="Comparte tu opinión sobre esta película..." required></textarea>
+          </div>
+          
+          <div class="flex gap-3">
+            <button type="submit" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-6 py-2 rounded-lg text-sm font-bold transition">
+              <i class="fas fa-paper-plane"></i> Publicar Reseña
+            </button>
+            <button type="button" onclick="toggleReviewForm()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg text-sm font-bold transition">
+              Cancelar
+            </button>
+          </div>
+        </form>
       </div>
-      {% endfor %}
+      
+      <!-- Lista de reseñas -->
+      <div id="reviews-list" class="space-y-4">
+        <!-- Las reseñas se cargarán aquí vía WebSocket -->
+      </div>
+      
+      <!-- Estado de conexión -->
+      <div id="connection-status" class="text-center py-4 text-sm text-gray-500">
+        <i class="fas fa-spinner fa-spin"></i> Conectando...
+      </div>
     </div>
     
   </div>
@@ -201,7 +247,369 @@
 
 {% block extra_js %}
 <script>
-  // url
+// Forzar recarga evitando caché - Versión: {% now 'U' %}
+console.log('Cargando reseñas WebSocket - v', '{{ pelicula.id }}', new Date().getTime());
+  // Variables globales
+  let socket = null;
+  let currentRating = 0;
+  let movieId = '{{ pelicula.id }}';
+  let movieTitle = '{{ pelicula.title|escapejs }}';
+  let pollingInterval = null;
+  let initialReviewsLoaded = false;
+
+  // Función para conectar al WebSocket (con fallback a polling)
+  function connectWebSocket() {
+    console.log('Intentando conectar WebSocket con movieId:', movieId);
+    
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/reviews/${movieId}/`;
+    console.log('URL WebSocket:', wsUrl);
+    
+    try {
+      socket = new WebSocket(wsUrl);
+      
+      socket.onopen = function(e) {
+        console.log('✅ Conectado al WebSocket de reseñas');
+        document.getElementById('connection-status').innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Conectado (WebSocket)';
+        
+        // Solo cargar reseñas existentes si no hay ninguna en el DOM
+        const reviewsList = document.getElementById('reviews-list');
+        if (reviewsList.children.length === 0 || reviewsList.querySelector('.fa-comment-slash')) {
+          socket.send(JSON.stringify({
+            'action': 'get_reviews'
+          }));
+        }
+      };
+      
+      socket.onmessage = function(e) {
+        console.log('📨 Mensaje recibido:', e.data);
+        const data = JSON.parse(e.data);
+        handleWebSocketMessage(data);
+      };
+      
+      socket.onclose = function(e) {
+        console.log('❌ Desconectado del WebSocket', e);
+        document.getElementById('connection-status').innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
+        
+        // Cambiar a polling si WebSocket falla
+        startPolling();
+      };
+      
+      socket.onerror = function(e) {
+        console.error('🚨 Error en WebSocket:', e);
+        document.getElementById('connection-status').innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
+        
+        // Cambiar a polling si hay error
+        startPolling();
+      };
+    } catch (error) {
+      console.error('❌ Error al crear WebSocket:', error);
+      document.getElementById('connection-status').innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
+      
+      // Usar polling como fallback
+      startPolling();
+    }
+  }
+  
+  // Función de polling como fallback
+  function startPolling() {
+    if (pollingInterval) return; // Evitar múltiples intervalos
+    
+    console.log('🔄 Iniciando polling para reseñas');
+    document.getElementById('connection-status').innerHTML = '<i class="fas fa-sync text-blue-500"></i> Actualizando automáticamente (Polling)';
+    
+    // Cargar reseñas iniciales (usando displayReviews para carga completa inicial)
+    fetch(`/api/reviews/${movieId}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.reviews) {
+          displayReviews(data.reviews);
+        }
+      })
+      .catch(error => {
+        console.error('Error cargando reseñas iniciales:', error);
+      });
+    
+    // Configurar polling cada 5 segundos
+    pollingInterval = setInterval(loadReviewsViaAJAX, 5000);
+  }
+  
+  function loadReviewsViaAJAX() {
+    fetch(`/api/reviews/${movieId}/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.reviews) {
+          console.log('📊 Polling: recibidas', data.reviews.length, 'reseñas del servidor');
+          console.log('📋 Polling: IDs recibidos', data.reviews.map(r => r.id));
+          
+          const reviewsList = document.getElementById('reviews-list');
+          const existingReviewIds = Array.from(reviewsList.querySelectorAll('[data-review-id]'))
+            .map(el => el.getAttribute('data-review-id'));
+          
+          console.log('📋 Polling: IDs existentes en DOM', existingReviewIds);
+          
+          const newReviews = data.reviews.filter(review => 
+            !existingReviewIds.includes(review.id.toString())
+          );
+          
+          console.log('🆕 Polling: reseñas nuevas para añadir', newReviews.length, newReviews.map(r => r.id));
+          
+          if (newReviews.length > 0) {
+            newReviews.forEach(review => addReviewToList(review));
+          }
+          
+          // Actualizar contador
+          const currentReviews = reviewsList.querySelectorAll('[data-review-id]').length;
+          console.log('🔢 Polling: total reseñas en DOM después de actualizar', currentReviews);
+          updateReviewCount(currentReviews);
+        }
+      })
+      .catch(error => {
+        console.error('Error cargando reseñas:', error);
+      });
+  }
+  
+  // Manejar mensajes del WebSocket
+  function handleWebSocketMessage(data) {
+    if (data.action === 'reviews_list') {
+      displayReviews(data.reviews);
+    } else if (data.action === 'new_review') {
+      addReviewToList(data.review);
+    } else if (data.error) {
+      alert(data.error);
+    }
+  }
+  
+  // Mostrar lista de reseñas (solo para carga inicial vía WebSocket)
+  function displayReviews(reviews) {
+    const reviewsList = document.getElementById('reviews-list');
+    
+    // Solo limpiar si está vacío o tiene el mensaje de "no hay reseñas"
+    if (reviewsList.children.length === 0 || reviewsList.querySelector('.fa-comment-slash')) {
+      reviewsList.innerHTML = '';
+      
+      if (reviews.length === 0) {
+        reviewsList.innerHTML = `
+          <div class="text-center py-16 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/5">
+            <i class="fas fa-comment-slash text-5xl text-gray-400 dark:text-gray-600 mb-4"></i>
+            <p class="text-gray-500 dark:text-gray-400">No hay reseñas todavía</p>
+          </div>
+        `;
+      } else {
+        reviews.forEach(review => addReviewToList(review));
+      }
+    } else {
+      // Si ya hay reseñas, solo añadir las nuevas (por ID)
+      const existingReviewIds = Array.from(reviewsList.querySelectorAll('[data-review-id]'))
+        .map(el => el.getAttribute('data-review-id'));
+      
+      const newReviews = reviews.filter(review => 
+        !existingReviewIds.includes(review.id.toString())
+      );
+      
+      console.log('📊 displayReviews: Reseñas existentes en DOM:', existingReviewIds.length);
+      console.log('📊 displayReviews: Reseñas recibidas del servidor:', reviews.length);
+      console.log('📊 displayReviews: Reseñas nuevas para añadir:', newReviews.length);
+      
+      newReviews.forEach(review => addReviewToList(review));
+    }
+    
+    // Actualizar contador
+    const currentReviews = reviewsList.querySelectorAll('[data-review-id]').length;
+    updateReviewCount(currentReviews);
+  }
+  
+  // Añadir reseña a la lista
+  function addReviewToList(review) {
+    console.log('➕ Añadiendo reseña:', review.id, 'por', review.user);
+    
+    const reviewsList = document.getElementById('reviews-list');
+    console.log('📋 Antes de añadir - reseñas en DOM:', reviewsList.children.length);
+    
+    // Si es el primer mensaje, limpiar el "no hay reseñas"
+    if (reviewsList.querySelector('.fa-comment-slash')) {
+      console.log('🧹 Limpiando mensaje de "no hay reseñas"');
+      reviewsList.innerHTML = '';
+    }
+    
+    // Verificar si ya existe esta reseña
+    const existingReview = reviewsList.querySelector(`[data-review-id="${review.id}"]`);
+    if (existingReview) {
+      console.log('⚠️ La reseña', review.id, 'ya existe en el DOM, no se añade');
+      return;
+    }
+    
+    const reviewElement = document.createElement('div');
+    reviewElement.className = 'bg-gray-50 dark:bg-[#1a1a1a] rounded-xl p-6 border border-gray-200 dark:border-white/5';
+    reviewElement.setAttribute('data-review-id', review.id);
+    reviewElement.innerHTML = `
+      <div class="flex items-start gap-4">
+        <img src="${review.avatar}" alt="${review.user}" class="w-12 h-12 rounded-full">
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-gray-900 dark:text-white">${review.user}</h4>
+            <span class="text-sm text-gray-500">${review.created_at}</span>
+          </div>
+          <div class="flex items-center gap-2 mb-3">
+            ${generateStars(review.rating)}
+            <span class="text-sm text-gray-500">(${review.rating}/5)</span>
+          </div>
+          <p class="text-gray-700 dark:text-gray-300">${review.content}</p>
+        </div>
+      </div>
+    `;
+    
+    reviewsList.insertBefore(reviewElement, reviewsList.firstChild);
+    console.log('📋 Después de añadir - reseñas en DOM:', reviewsList.children.length);
+    updateReviewCount(reviewsList.children.length);
+  }
+  
+  // Generar estrellas HTML
+  function generateStars(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars += '<i class="fas fa-star text-yellow-500"></i>';
+      } else {
+        stars += '<i class="far fa-star text-gray-300"></i>';
+      }
+    }
+    return stars;
+  }
+  
+  // Actualizar contador de reseñas
+  function updateReviewCount(count) {
+    const countElement = document.getElementById('review-count');
+    countElement.textContent = `${count} reseña${count !== 1 ? 's' : ''}`;
+  }
+  
+  // Mostrar/ocultar formulario
+  function toggleReviewForm() {
+    const form = document.getElementById('review-form');
+    form.classList.toggle('hidden');
+  }
+  
+  // Establecer puntuación
+  function setRating(rating) {
+    currentRating = rating;
+    document.getElementById('rating').value = rating;
+    
+    // Actualizar estrellas visuales
+    const stars = document.querySelectorAll('.star-btn i');
+    stars.forEach((star, index) => {
+      if (index < rating) {
+        star.classList.remove('far', 'text-gray-300');
+        star.classList.add('fas', 'text-yellow-500');
+      } else {
+        star.classList.remove('fas', 'text-yellow-500');
+        star.classList.add('far', 'text-gray-300');
+      }
+    });
+  }
+  
+  // Enviar reseña
+  document.getElementById('review-form-element').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const content = document.getElementById('content').value.trim();
+    
+    if (currentRating === 0) {
+      alert('Por favor, selecciona una puntuación');
+      return;
+    }
+    
+    if (!content) {
+      alert('Por favor, escribe una reseña');
+      return;
+    }
+    
+    // Intentar enviar por WebSocket primero
+    console.log('WebSocket state:', socket ? socket.readyState : 'null');
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      console.log('Enviando reseña por WebSocket');
+      socket.send(JSON.stringify({
+        'action': 'add_review',
+        'rating': currentRating,
+        'content': content,
+        'movie_title': movieTitle
+      }));
+      
+      // Limpiar formulario
+      document.getElementById('content').value = '';
+      setRating(0);
+      toggleReviewForm();
+    } else {
+      console.log('WebSocket no disponible, usando API fallback');
+      // Usar API fallback
+      sendReviewViaAPI();
+    }
+  });
+  
+  // Función para enviar reseña vía API (fallback)
+  function sendReviewViaAPI() {
+    const content = document.getElementById('content').value.trim();
+    
+    fetch(`/api/reviews/${movieId}/add/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({
+        'rating': currentRating,
+        'content': content,
+        'movie_title': movieTitle
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Añadir la reseña a la lista
+        addReviewToList(data.review);
+        
+        // Limpiar formulario
+        document.getElementById('content').value = '';
+        setRating(0);
+        toggleReviewForm();
+        
+        // Actualizar contador
+        const reviewsList = document.getElementById('reviews-list');
+        updateReviewCount(reviewsList.children.length);
+      } else {
+        alert(data.error || 'Error al enviar la reseña');
+      }
+    })
+    .catch(error => {
+      console.error('Error enviando reseña:', error);
+      alert('Error de conexión. Intenta recargar la página.');
+    });
+  }
+  
+  // Función para redirigir a registro
+  function redirectToRegister() {
+    // Mostrar mensaje informativo
+    if (confirm('Para escribir una reseña necesitas estar registrado. ¿Te gustaría registrarte ahora?')) {
+      window.location.href = '/users/register';
+    }
+  }
+  
+  // Función para obtener CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  
+  // Función existente (sin alterar)
   function addToList(button, movieId, movieTitle) {
     var isInList = button.classList.contains('added');
     
@@ -216,5 +624,10 @@
       button.innerHTML = '<i class="fas fa-check text-sm"></i>';
     }
   }
+  
+  // Iniciar conexión WebSocket cuando se carga la página
+  document.addEventListener('DOMContentLoaded', function() {
+    connectWebSocket();
+  });
 </script>
 {% endblock %}

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',      # ---
     'django.contrib.messages',      # ---
     'django.contrib.staticfiles',   # unchanging files served by us
+    'channels',                     # WebSocket support
     'movies',                       # catalog of movies and principal pages
     'users',                        # user management app
     #'prices',                      # movie prices and plans for users
@@ -163,4 +164,14 @@ if not TMDB_API_KEY:
 # for profile images
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.getenv('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
+
+# CONFIGURACIÓN DE CHANNELS (WEBSOCKETS) - TEMPORALMENTE DESHABILITADO
+# ASGI_APPLICATION = 'absolute_cinema.asgi.application'
+
+# Configuración del canal layer (para desarrollo usamos memoria, para producción Redis)
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer'
+#     }
+# }
 

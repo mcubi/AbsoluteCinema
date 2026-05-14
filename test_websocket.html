@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test WebSocket Reviews</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .review {
+        border: 1px solid #ccc;
+        margin: 10px;
+        padding: 10px;
+      }
+      .stars {
+        color: gold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test WebSocket Reviews - Película ID: 123</h1>
+
+    <div>
+      <h3>Enviar Reseña de Prueba</h3>
+      <input type="number" id="movieId" value="123" placeholder="ID Película" />
+      <input
+        type="number"
+        id="rating"
+        min="1"
+        max="5"
+        placeholder="Rating (1-5)"
+      />
+      <input type="text" id="content" placeholder="Contenido de la reseña" />
+      <input
+        type="text"
+        id="movieTitle"
+        value="Película de Prueba"
+        placeholder="Título Película"
+      />
+      <button onclick="sendReview()">Enviar Reseña</button>
+    </div>
+
+    <div>
+      <h3>Estado de Conexión</h3>
+      <div id="status">Desconectado</div>
+    </div>
+
+    <div>
+      <h3>Reseñas Recibidas</h3>
+      <div id="reviews"></div>
+    </div>
+
+    <script>
+      let socket = null;
+
+      function connectWebSocket() {
+        const movieId = document.getElementById("movieId").value;
+        const wsUrl = `ws://127.0.0.1:8001/ws/reviews/${movieId}/`;
+
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = function (e) {
+          console.log("Conectado al WebSocket");
+          document.getElementById("status").innerHTML =
+            '<span style="color: green;">Conectado</span>';
+
+          // Cargar reseñas existentes
+          socket.send(
+            JSON.stringify({
+              action: "get_reviews",
+            }),
+          );
+        };
+
+        socket.onmessage = function (e) {
+          const data = JSON.parse(e.data);
+          console.log("Mensaje recibido:", data);
+
+          if (data.action === "reviews_list") {
+            displayReviews(data.reviews);
+          } else if (data.action === "new_review") {
+            addReview(data.review);
+          } else if (data.error) {
+            alert("Error: " + data.error);
+          }
+        };
+
+        socket.onclose = function (e) {
+          console.log("Desconectado del WebSocket");
+          document.getElementById("status").innerHTML =
+            '<span style="color: red;">Desconectado</span>';
+        };
+
+        socket.onerror = function (e) {
+          console.error("Error en WebSocket:", e);
+          document.getElementById("status").innerHTML =
+            '<span style="color: red;">Error</span>';
+        };
+      }
+
+      function sendReview() {
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+          alert("WebSocket no está conectado");
+          return;
+        }
+
+        const movieId = document.getElementById("movieId").value;
+        const rating = document.getElementById("rating").value;
+        const content = document.getElementById("content").value;
+        const movieTitle = document.getElementById("movieTitle").value;
+
+        if (!rating || !content) {
+          alert("Por favor completa todos los campos");
+          return;
+        }
+
+        socket.send(
+          JSON.stringify({
+            action: "add_review",
+            rating: parseInt(rating),
+            content: content,
+            movie_title: movieTitle,
+          }),
+        );
+
+        // Limpiar formulario
+        document.getElementById("rating").value = "";
+        document.getElementById("content").value = "";
+      }
+
+      function displayReviews(reviews) {
+        const reviewsDiv = document.getElementById("reviews");
+        reviewsDiv.innerHTML = "";
+
+        if (reviews.length === 0) {
+          reviewsDiv.innerHTML = "<p>No hay reseñas</p>";
+          return;
+        }
+
+        reviews.forEach((review) => addReview(review));
+      }
+
+      function addReview(review) {
+        const reviewsDiv = document.getElementById("reviews");
+
+        const reviewDiv = document.createElement("div");
+        reviewDiv.className = "review";
+        reviewDiv.innerHTML = `
+                <strong>${review.user}</strong> - ${review.created_at}<br>
+                <span class="stars">${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</span> (${review.rating}/5)<br>
+                <p>${review.content}</p>
+            `;
+
+        reviewsDiv.insertBefore(reviewDiv, reviewsDiv.firstChild);
+      }
+
+      // Conectar automáticamente al cargar la página
+      window.onload = function () {
+        connectWebSocket();
+      };
+    </script>
+  </body>
+</html>

@@ -2,11 +2,13 @@ import random
 import json
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies
-from .models import MiLista
+from .models import MiLista, Review
 
 # HOMEPAGE FUNCTION 
 def index_devolution(request):
@@ -26,9 +28,10 @@ def home_api(request):
     if peliculas_tendencias:
         pelicula_aleatoria = random.choice(peliculas_tendencias)
         
-    # --- ¡NUEVO! SACAR LOS IDs DE TUS PELÍCULAS GUARDADAS ---
+    # --- ¡NUEVO! SACAR LOS IDS DE TUS PELÍCULAS GUARDADAS ---
     mis_peliculas_ids = []
-    if request.user.is_authenticated:
+    # Verificar si el usuario está autenticado de forma segura
+    if hasattr(request, 'user') and request.user.is_authenticated:
         # Esto saca una lista de números con las pelis que has guardado [123, 456...]
         mis_peliculas_ids = list(MiLista.objects.filter(user=request.user).values_list('movie_id', flat=True))
     
@@ -118,5 +121,67 @@ def toggle_lista(request):
             )
             return JsonResponse({'status': 'added'})
             
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+# --- API PARA OBTENER RESEÑAS (FALLBACK WEBSOCKET) ---
+@require_GET
+def get_reviews(request, movie_id):
+    try:
+        reviews = Review.objects.filter(movie_id=movie_id).select_related('user').order_by('-created_at')
+        
+        reviews_data = []
+        for review in reviews:
+            reviews_data.append({
+                'id': review.id,
+                'user': review.user.username,
+                'rating': review.rating,
+                'content': review.content,
+                'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
+                'avatar': review.user.users.avatar.url if hasattr(review.user, 'users') and review.user.users.avatar else '/static/img/default-avatar.png'
+            })
+        
+        return JsonResponse({
+            'reviews': reviews_data,
+            'count': len(reviews_data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+# --- API PARA AÑADIR RESEÑA (FALLBACK WEBSOCKET) ---
+@login_required
+@require_POST
+def add_review_api(request, movie_id):
+    try:
+        data = json.loads(request.body)
+        rating = data.get('rating')
+        content = data.get('content')
+        movie_title = data.get('movie_title', '')
+        
+        if not rating or not content:
+            return JsonResponse({'error': 'La puntuación y el contenido son obligatorios'}, status=400)
+        
+        # Crear nueva reseña
+        review = Review.objects.create(
+            user=request.user,
+            movie_id=movie_id,
+            movie_title=movie_title,
+            rating=rating,
+            content=content
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'review': {
+                'id': review.id,
+                'user': review.user.username,
+                'rating': review.rating,
+                'content': review.content,
+                'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
+                'avatar': review.user.users.avatar.url if hasattr(review.user, 'users') and review.user.users.avatar else '/static/img/default-avatar.png'
+            }
+        })
+        
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
