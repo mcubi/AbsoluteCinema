@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{{ pelicula.title }} | Reseñas - Absolute Cinema
+{% endblock %}
+
+{% block content %}
+
+<!--MAIN CONTAINER-->
+<div class="bg-white dark:bg-ac-bg min-h-screen">
+  <div class="container mx-auto px-4 py-8 pt-24">
+
+    <!--to return to the main menu-->
+    <div class="mb-6">
+      <a href="javascript:history.back()" class="text-gray-500 dark:text-gray-400 hover:text-ac-primary transition text-sm flex items-center gap-2 w-fit">
+        <i class="fas fa-arrow-left"></i> Volver atrás
+      </a>
+    </div>
+
+    <!--MOVIE HEADER SECTION-->
+    <div class="flex flex-col md:flex-row gap-8 mb-8">
+      
+      <!--poster column-->
+      <div class="md:w-1/4">
+        
+        <div class="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.2)]">
+          <img
+            src="{{ pelicula.poster_url|default:'https://via.placeholder.com/500x750?text=No+Poster' }}"
+            alt="{{ pelicula.title }}"
+            class="w-full"
+          />
+        </div>
+        
+        <!--for the trailer  ARREGLAR-->
+        <div class="mt-4">
+          <button class="w-full bg-ac-primary hover:bg-ac-primary-dark text-white px-4 py-3 rounded-lg font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition hover:-translate-y-1 flex items-center justify-center gap-2">
+            <i class="fas fa-play"></i> VER TRÁILER
+          </button>
+        </div>
+        
+        <!--streaming info-->
+        <div class="mt-6 text-center bg-gray-100 dark:bg-[#181818] rounded-xl p-4 border border-gray-200 dark:border-white/5">
+          <p class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-3">DISPONIBLE EN</p>
+          <div class="flex items-center justify-center flex-wrap gap-3">
+            {% if pelicula.providers %}
+                {% for provider in pelicula.providers %}
+                    <img src="{{ provider.logo_url }}" 
+                         alt="{{ provider.name }}" 
+                         title="{{ provider.name }}" 
+                         class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-gray-200 dark:border-white/10 hover:scale-110 transition cursor-help">
+                {% endfor %}
+            {% else %}
+                <span class="text-gray-500 dark:text-gray-400 text-xs italic">No disponible en streaming</span>
+            {% endif %}
+          </div>
+        </div>
+
+      <!--info-->
+      </div> 
+      <div class="md:w-3/4 text-gray-900 dark:text-white">
+
+        <!--Title and badges-->
+        <h1 class="text-4xl md:text-6xl font-brand tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-700 dark:to-gray-300 mb-2">
+            {{ pelicula.title }}
+        </h1>
+        
+        <!--Serie/TV badge and details-->
+        <div class="flex items-center gap-3 flex-wrap mb-6 text-sm font-semibold">
+          <span class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">
+            {% if pelicula.runtime %}Película{% else %}Serie TV{% endif %}
+          </span>
+          <span class="text-ac-primary">•</span>
+          <span class="text-gray-600 dark:text-gray-300">{{ pelicula.release_date|slice:":4"|default:"N/A" }}</span>
+          <span class="text-ac-primary">•</span>
+          <span class="text-gray-600 dark:text-gray-300">{{ pelicula.runtime|default:"0" }} min</span>
+          <span class="text-ac-primary">•</span>
+          <span class="text-gray-600 dark:text-gray-300 uppercase">{{ pelicula.original_language }}</span>
+        </div>
+        
+        <!--Tagline-->
+        {% if pelicula.tagline %}
+        <p class="text-ac-primary font-medium italic text-lg mb-6 border-l-2 border-ac-primary pl-3">{{ pelicula.tagline }}</p>
+        {% endif %}
+        
+        <!--Synopsis-->
+        <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">Sinopsis</h2>
+        <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8 max-w-4xl font-light">
+          {{ pelicula.overview|default:"Sin sinopsis disponible en español para esta película." }}
+        </p>
+        
+        <!--tabs-->
+        <div class="flex flex-wrap gap-6 mb-8 border-b border-gray-200 dark:border-white/10 pb-2">
+          <a href="#" class="text-ac-primary border-b-2 border-ac-primary pb-2 text-sm font-bold uppercase tracking-wider">Info Principal</a>
+          <a href="#reviews" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-bold uppercase tracking-wider">Reseñas</a>
+        </div>
+        
+        <!--RATING SECTION-->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
+            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">NOTA TMDB</div>
+            <div class="flex items-center justify-center gap-2">
+              <i class="fas fa-star text-yellow-500 text-2xl"></i>
+              <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ pelicula.vote_average|floatformat:1|default:"0.0" }}</span>
+            </div>
+            <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ pelicula.vote_count }} votos</div>
+          </div>
+          
+          <!--User rating ARREGLAR (marcos haz una funcion de puntuar pls)-->
+          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
+            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">TU PUNTUACIÓN</div>
+            <a href="#" class="flex flex-col items-center justify-center gap-1 group cursor-pointer">
+              <i class="far fa-star text-2xl text-gray-500 dark:text-gray-500 group-hover:text-ac-primary transition transform group-hover:scale-110"></i>
+              <span class="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:roup-hover:text-white text-xs transition">Haz clic para puntuar</span>
+            </a>
+          </div>
+          
+          <!--Status-->
+          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
+            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">ESTADO</div>
+            <div class="text-2xl font-bold text-ac-primary mt-1">
+                {% if pelicula.release_date %}Estrenada{% else %}Próximamente{% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div> 
+    
+    <!--CAST SECTION-->
+    {% if pelicula.cast %}
+    <div class="mb-10 mt-4">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Reparto y equipo</h2>
+      <div class="flex overflow-x-auto gap-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+        {% for actor in pelicula.cast|slice:":12" %}
+        <div class="text-center min-w-[100px] group">
+          <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300">
+            {% if actor.profile_path %}
+            <img src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}" alt="{{ actor.name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500"/>
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-3xl bg-gray-200 dark:bg-gray-800">
+              <i class="fas fa-user text-gray-500 dark:text-gray-500"></i>
+            </div>
+            {% endif %}
+          </div>
+          <p class="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-ac-primary transition">{{ actor.name }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate px-1" title="{{ actor.character }}">{{ actor.character }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    <!--DIRECTOR-->
+    {% if pelicula.director %}
+    <div class="mb-8">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 border-l-4 border-ac-primary pl-3">Director</h2>
+      <p class="text-gray-700 dark:text-gray-300 text-base">{{ pelicula.director }}</p>
+    </div>
+    {% endif %}
+    
+    <!--GENRES-->
+    <div class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Géneros</h2>
+      <div class="flex flex-wrap gap-2">
+        {% for genre in pelicula.genres %}
+        <span class="bg-gray-100 dark:bg-white/10 px-4 py-1.5 rounded-full text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5">{{ genre.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <!--USER REVIEWS SECTION (ARREGLAR, GONZALO O ALEJANDRO)-->
+    <div id="reviews" class="mb-12">
+      <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-white/10 pb-4">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
+          Reseñas de usuarios
+          <span class="text-sm text-gray-500 font-normal ml-2">{{ reviews|length }} reseñas</span>
+        </h2>
+        <a href="#" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+            <i class="fas fa-pen"></i> Escribir Reseña
+        </a>
+      </div>
+      
+      <!--individual reviews-->
+      {% for review in reviews %}
+      {% empty %}
+      <div class="text-center py-16 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/5">
+        <i class="fas fa-comment-slash text-5xl text-gray-400 dark:text-gray-600 mb-4"></i>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">No hay reseñas todavía</p>
+        <a href="#" class="inline-block bg-ac-primary hover:bg-ac-primary-dark text-white px-6 py-2 rounded-lg text-sm transition font-semibold">
+          <i class="fas fa-pen"></i> Sé el primero en reseñar
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // url
+  function addToList(button, movieId, movieTitle) {
+    var isInList = button.classList.contains('added');
+    
+    // modificar si eso
+    if (isInList) {
+      button.classList.remove('added', 'bg-ac-primary', 'border-ac-primary');
+      button.classList.add('border-gray-500', 'text-gray-300');
+      button.innerHTML = '<i class="fas fa-plus text-sm"></i>';
+    } else {
+      button.classList.add('added', 'bg-ac-primary', 'border-ac-primary');
+      button.classList.remove('border-gray-500', 'text-gray-300');
+      button.innerHTML = '<i class="fas fa-check text-sm"></i>';
+    }
+  }
+</script>
+{% endblock %}

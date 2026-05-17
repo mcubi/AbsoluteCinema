@@ -1,0 +1,41 @@
+# Archivos de entorno
+.env
+.env.*
+
+# Dependencias de Python
+venv/
+env/
+*.pyc
+__pycache__/
+
+# Archivos de base de datos
+*.sqlite3
+db.sqlite3
+
+# Dependencias de Node.js
+node_modules/
+
+# Archivos de build del frontend
+dist/
+build/
+
+# Logs
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración de IDEs
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# Archivos estáticos y media de Django (si se generan localmente)
+staticfiles/
+mediafiles/
+
+# Reportes de cobertura
+.coverage
+htmlcov/

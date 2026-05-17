@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Mi Perfil - Absolute Cinema
+{% endblock %}
+
+{% block content %}
+
+<!--gonzalo y alejandro, teneis que poner aqui algunas cosas de la funcionalidad de mensajes-->
+<div class="bg-white dark:bg-ac-bg min-h-screen">
+  <div class="container mx-auto px-4 py-8 pt-24">
+    
+    <div class="max-w-2xl mx-auto">
+      
+      <!--avatar-->
+      <div class="flex justify-center mb-4">
+        <div class="w-32 h-32 rounded-full bg-gradient-to-br from-ac-primary to-blue-600 p-1">
+          {% if perfil.avatar and perfil.avatar.url %}
+            <img src="{{ perfil.avatar.url }}" alt="{{ perfil.first_name }}" class="w-full h-full rounded-full object-cover bg-black">
+          {% else %}
+            <div class="w-full h-full rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+              <i class="fas fa-user text-4xl text-gray-400 dark:text-gray-500"></i>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!--name-->
+      <div class="text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+          {{ perfil.first_name }} {{ perfil.last_name }}
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+          @{{ perfil.user.username }}
+        </p>
+      </div>
+
+      <!--SOLO IDEA-->
+      <div class="flex justify-center gap-8 mb-6">
+        <div class="text-center">
+          <div class="text-xl font-bold text-gray-900 dark:text-white">0</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">Reseñas</div>
+        </div>
+        <div class="text-center">
+          <div class="text-xl font-bold text-gray-900 dark:text-white">0</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">Películas</div>
+        </div>
+        <div class="text-center">
+          <div class="text-xl font-bold text-gray-900 dark:text-white">0</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">Seguidores</div>
+        </div>
+      </div>
+
+      <!--date-->
+      <div class="text-center pt-4 border-t border-gray-200 dark:border-white/10">
+        <p class="text-xs text-gray-500 dark:text-gray-500">
+          <i class="fas fa-calendar-alt mr-1"></i> Se unió el {{ perfil.user.date_joined|date:"d/m/Y" }}
+        </p>
+      </div>
+
+    </div>
+    
+  </div>
+</div>
+
+{% endblock %}
