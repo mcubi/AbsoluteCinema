@@ -3,34 +3,64 @@
 
 {% block title %}Series - Absolute Cinema{% endblock %}
 
+{% block global_search %}
+<!-- Bloque vacío para ocultar el buscador global en esta página -->
+{% endblock %}
+{% block mobile_search %}
+<!-- Bloque vacío para ocultar el buscador móvil en esta página -->
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-white dark:bg-ac-bg pt-10 px-6 pb-20">
     <div class="max-w-[1600px] mx-auto">
 
-        <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-10 border-b border-gray-200 dark:border-white/10 pb-6 animate-fade-in">
-            <div class="text-center md:text-left w-full md:w-auto">
-                <h1 class="text-4xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-800 dark:to-white tracking-wider mb-2 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                    CATÁLOGO DE SERIES
-                </h1>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Explora el contenido directamente desde TMDB</p>
-            </div>
+        <form method="get" action="{% url 'series' %}">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 border-b border-gray-200 dark:border-white/10 pb-6 animate-fade-in gap-6">
+                
+                <!-- Lado Izquierdo: Título y Buscador -->
+                <div class="w-full md:w-auto">
+                    <div class="text-center md:text-left">
+                        <h1 class="text-4xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-800 dark:to-white tracking-wider mb-2 drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                            CATÁLOGO DE SERIES
+                        </h1>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Explora el contenido directamente desde TMDB</p>
+                    </div>
+                    <!-- Campo de búsqueda -->
+                    <div class="relative w-full md:w-80 mt-4">
+                        <input type="text" name="q" placeholder="Buscar en series..." value="{{ query|default:'' }}" class="w-full bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-full py-2 px-5 pr-12 text-sm focus:ring-2 focus:ring-ac-primary focus:border-ac-primary outline-none transition">
+                        <button type="submit" class="absolute right-0 top-0 h-full px-4 text-gray-400 hover:text-ac-primary transition">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="flex justify-start md:justify-end w-full md:w-auto gap-3 mt-6 md:mt-0 overflow-x-auto pb-4 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                <a href="?filtro=populares" 
-                   class="shrink-0 {% if filtro_actual == 'populares' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
-                    Populares
-                </a>
-                <a href="?filtro=emision" 
-                   class="shrink-0 {% if filtro_actual == 'emision' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
-                    En Emisión
-                </a>
-                <a href="?filtro=valoradas" 
-                   class="shrink-0 {% if filtro_actual == 'valoradas' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
-                    Mejor Valoradas
-                </a>
-                <div class="shrink-0 w-6 md:hidden"></div>
+                <!-- Lado Derecho: Filtros -->
+                <div class="flex justify-start md:justify-end w-full md:w-auto gap-3 overflow-x-auto pb-2 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                    <a href="?filtro=populares{% if current_genre %}&genre={{ current_genre }}{% endif %}" class="shrink-0 {% if filtro_actual == 'populares' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">Populares</a>
+                    <a href="?filtro=emision{% if current_genre %}&genre={{ current_genre }}{% endif %}" class="shrink-0 {% if filtro_actual == 'emision' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">En Emisión</a>
+                    <a href="?filtro=valoradas{% if current_genre %}&genre={{ current_genre }}{% endif %}" class="shrink-0 {% if filtro_actual == 'valoradas' %}bg-ac-primary text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]{% else %}bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/5{% endif %} px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">Mejor Valoradas</a>
+                    
+                    <!-- Genre Filter -->
+                    <div class="w-full md:w-auto shrink-0">
+                        <label for="genre-select" class="sr-only">Filtrar por género</label>
+                        <div class="relative">
+                            <select id="genre-select" name="genre" onchange="this.form.submit()" class="w-full bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-white/20 rounded-full px-5 py-2 text-gray-700 dark:text-white focus:border-ac-primary focus:outline-none transition appearance-none pr-10 cursor-pointer text-sm font-semibold">
+                                <option value="">Todos los géneros</option>
+                                {% for genre in genres %}
+                                    <option value="{{ genre.id }}" {% if current_genre == genre.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ genre.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="shrink-0 w-4 md:hidden"></div>
+                </div>
             </div>
-        </div>
+        </form>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
 

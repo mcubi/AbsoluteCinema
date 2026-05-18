@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
-from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies, get_tv_shows, get_tv_show_details, get_person_details
+from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies, get_tv_shows, get_tv_show_details, get_person_details, get_movie_genres, get_tv_genres, discover_movies, discover_tv_shows, search_movies, search_tv_shows
 from .models import MiLista, Review
 
 # HOMEPAGE FUNCTION 
@@ -81,15 +81,20 @@ def detalle_pelicula(request, movie_id):
 
 # --- CATÁLOGO DE PELÍCULAS ---
 def catalogo_peliculas(request):
-    filtro = request.GET.get('filtro', 'populares')
+    filtro_actual = request.GET.get('filtro', 'populares')
+    genero_actual = request.GET.get('genre')
+    query = request.GET.get('q')
     
-    if filtro == 'cartelera':
-        peliculas = get_now_playing_movies()
-    elif filtro == 'valoradas':
-        peliculas = get_top_rated_movies()
+    # Obtener la lista de géneros para el desplegable
+    generos = get_movie_genres()
+
+    if query:
+        # Si hay una consulta de búsqueda, buscamos por nombre
+        peliculas = search_movies(query)
     else:
-        peliculas = get_popular_movies()
-        
+        # Si no, usamos los filtros de descubrimiento
+        peliculas = discover_movies(sort_by=filtro_actual, genre=genero_actual)
+
     mis_peliculas_ids = []
     if request.user.is_authenticated:
         # Aquí solo queremos las pelis (IDs positivos)
@@ -97,8 +102,11 @@ def catalogo_peliculas(request):
         
     return render(request, 'movies/peliculas.html', {
         'movies': peliculas,
-        'filtro_actual': filtro,
-        'mis_peliculas_ids': mis_peliculas_ids
+        'filtro_actual': filtro_actual,
+        'mis_peliculas_ids': mis_peliculas_ids,
+        'genres': generos,
+        'current_genre': genero_actual,
+        'query': query,
     })
 
 # --- VISTA DE MI LISTA ---
@@ -165,17 +173,31 @@ def toggle_lista(request):
 # --- CATÁLOGO DE SERIES ---
 def catalogo_series(request):
     filtro_actual = request.GET.get('filtro', 'populares')
-    series = get_tv_shows(filtro=filtro_actual)
-    
-    mis_peliculas_ids = []
+    genero_actual = request.GET.get('genre')
+    query = request.GET.get('q')
+
+    # Obtener la lista de géneros de series para el desplegable
+    generos = get_tv_genres()
+
+    if query:
+        # Si hay una consulta de búsqueda, buscamos por nombre
+        series = search_tv_shows(query)
+    else:
+        # Si no, usamos los filtros de descubrimiento
+        series = discover_tv_shows(sort_by=filtro_actual, genre=genero_actual)
+
+    mis_peliculas_ids = {}
     if request.user.is_authenticated:
         ids_negativos = list(MiLista.objects.filter(user=request.user, movie_id__lt=0).values_list('movie_id', flat=True))
-        mis_peliculas_ids = [abs(id) for id in ids_negativos]
-        
+        mis_peliculas_ids = {abs(id) for id in ids_negativos}
+
     return render(request, 'movies/series.html', {
         'movies': series,
         'filtro_actual': filtro_actual,
-        'mis_peliculas_ids': mis_peliculas_ids
+        'mis_peliculas_ids': mis_peliculas_ids,
+        'genres': generos,
+        'current_genre': genero_actual,
+        'query': query,
     })
 
 # --- DETALLE DE SERIES ---
@@ -191,11 +213,11 @@ def detalle_serie(request, series_id):
     # y el botón de "Mi Lista" sepan sin dudarlo que están tratando con una serie
     serie['id'] = -abs(series_id)
         
-    mis_peliculas_ids = []
+    mis_peliculas_ids = set()
     if request.user.is_authenticated:
         # Comprobamos en la base de datos con el ID negativo
         if MiLista.objects.filter(user=request.user, movie_id=-abs(series_id)).exists():
-            mis_peliculas_ids = [-abs(series_id)] # Le mandamos el negativo al HTML para que pinte el tick
+            mis_peliculas_ids = {-abs(series_id)} # Le mandamos el negativo al HTML para que pinte el tick
     
     return render(request, 'movies/detalle.html', {
         'pelicula': serie,
@@ -217,6 +239,7 @@ def detalle_actor(request, person_id):
     return render(request, 'movies/actor.html', {
         'persona': persona,
     })
+
     
 # WEBSOCKET VIEW FUNCTION:
 

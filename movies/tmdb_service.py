@@ -235,14 +235,15 @@ def get_random_popular_movies(limit=10):
 
 
 # --- FUNCIÓN PARA SERIES ---
-def get_tv_shows(filtro='populares', page=1):
+def get_tv_shows(filtro='populares', page=1, genre_id=None):
     endpoints = {
         'populares': 'tv/popular',
         'valoradas': 'tv/top_rated',
         'emision': 'tv/on_the_air'
     }
     
-    endpoint = endpoints.get(filtro, 'tv/popular')
+    # Si hay un género, usamos discover, si no, los endpoints de siempre
+    endpoint = 'discover/tv' if genre_id else endpoints.get(filtro, 'tv/popular')
     url = f"{BASE_URL}/{endpoint}?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
     
     try:
@@ -407,3 +408,218 @@ def get_person_details(person_id):
         }
         return person_details
     return None
+
+# --- FUNCIONES PARA GÉNEROS ---
+def get_movie_genres():
+    url = f"{BASE_URL}/genre/movie/list?api_key={API_KEY}&language=es-ES"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json().get('genres', [])
+    except requests.RequestException as e:
+        print(f"Error al obtener géneros de películas: {e}")
+        return []
+
+def get_tv_genres():
+    url = f"{BASE_URL}/genre/tv/list?api_key={API_KEY}&language=es-ES"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json().get('genres', [])
+    except requests.RequestException as e:
+        print(f"Error al obtener géneros de series: {e}")
+        return []
+
+# --- FUNCIONES DE DISCOVER ---
+def discover_movies(sort_by='populares', genre=None, page=1):
+    url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
+
+    sort_map = {
+        'populares': 'popularity.desc',
+        'valoradas': 'vote_average.desc',
+        'cartelera': 'primary_release_date.desc'
+    }
+    url += f"&sort_by={sort_map.get(sort_by, 'popularity.desc')}"
+
+    if sort_by == 'valoradas':
+        url += "&vote_count.gte=200" # Para mejores resultados en 'valoradas'
+
+    if genre:
+        url += f"&with_genres={genre}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        movies = response.json().get('results', [])
+        return [
+            {
+                'id': movie['id'],
+                'title': movie['title'],
+                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                'vote_average': movie['vote_average'],
+                'release_date': movie.get('release_date', ''),
+            } for movie in movies
+        ]
+    except requests.RequestException as e:
+        print(f"Error en discover_movies: {e}")
+        return []
+
+def discover_tv_shows(sort_by='populares', genre=None, page=1):
+    url = f"{BASE_URL}/discover/tv?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
+
+    sort_map = {
+        'populares': 'popularity.desc',
+        'valoradas': 'vote_average.desc',
+        'emision': 'first_air_date.desc'
+    }
+    url += f"&sort_by={sort_map.get(sort_by, 'popularity.desc')}"
+
+    if sort_by == 'valoradas':
+        url += "&vote_count.gte=100"
+
+    if genre:
+        url += f"&with_genres={genre}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        series = response.json().get('results', [])
+        return [
+            {
+                'id': show['id'],
+                'title': show.get('name', 'Sin título'),
+                'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
+                'vote_average': show.get('vote_average', 0),
+                'release_date': show.get('first_air_date', ''),
+            } for show in series
+        ]
+    except requests.RequestException as e:
+        print(f"Error en discover_tv_shows: {e}")
+        return []
+
+# --- FUNCIONES PARA GÉNEROS ---
+def get_movie_genres():
+    url = f"{BASE_URL}/genre/movie/list?api_key={API_KEY}&language=es-ES"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json().get('genres', [])
+    except requests.RequestException as e:
+        print(f"Error al obtener géneros de películas: {e}")
+        return []
+
+def get_tv_genres():
+    url = f"{BASE_URL}/genre/tv/list?api_key={API_KEY}&language=es-ES"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json().get('genres', [])
+    except requests.RequestException as e:
+        print(f"Error al obtener géneros de series: {e}")
+        return []
+
+# --- FUNCIONES DE DISCOVER ---
+def discover_movies(sort_by='populares', genre=None, page=1):
+    url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
+
+    sort_map = {
+        'populares': 'popularity.desc',
+        'valoradas': 'vote_average.desc',
+        'cartelera': 'primary_release_date.desc'
+    }
+    url += f"&sort_by={sort_map.get(sort_by, 'popularity.desc')}"
+
+    if sort_by == 'valoradas':
+        url += "&vote_count.gte=200" # Para mejores resultados en 'valoradas'
+
+    if genre:
+        url += f"&with_genres={genre}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        movies = response.json().get('results', [])
+        return [
+            {
+                'id': movie['id'],
+                'title': movie['title'],
+                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                'vote_average': movie['vote_average'],
+                'release_date': movie.get('release_date', ''),
+            } for movie in movies
+        ]
+    except requests.RequestException as e:
+        print(f"Error en discover_movies: {e}")
+        return []
+
+def discover_tv_shows(sort_by='populares', genre=None, page=1):
+    url = f"{BASE_URL}/discover/tv?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
+
+    sort_map = {
+        'populares': 'popularity.desc',
+        'valoradas': 'vote_average.desc',
+        'emision': 'first_air_date.desc'
+    }
+    url += f"&sort_by={sort_map.get(sort_by, 'popularity.desc')}"
+
+    if sort_by == 'valoradas':
+        url += "&vote_count.gte=100"
+
+    if genre:
+        url += f"&with_genres={genre}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        series = response.json().get('results', [])
+        return [
+            {
+                'id': show['id'],
+                'title': show.get('name', 'Sin título'),
+                'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
+                'vote_average': show.get('vote_average', 0),
+                'release_date': show.get('first_air_date', ''),
+            } for show in series
+        ]
+    except requests.RequestException as e:
+        print(f"Error en discover_tv_shows: {e}")
+        return []
+
+# --- FUNCIONES DE BÚSQUEDA POR NOMBRE ---
+def search_movies(query, page=1):
+    url = f"{BASE_URL}/search/movie?api_key={API_KEY}&language=es-ES&query={query}&page={page}&include_adult=false"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        movies = response.json().get('results', [])
+        return [
+            {
+                'id': movie['id'],
+                'title': movie['title'],
+                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                'vote_average': movie['vote_average'],
+                'release_date': movie.get('release_date', ''),
+            } for movie in movies
+        ]
+    except requests.RequestException as e:
+        print(f"Error en search_movies: {e}")
+        return []
+
+def search_tv_shows(query, page=1):
+    url = f"{BASE_URL}/search/tv?api_key={API_KEY}&language=es-ES&query={query}&page={page}&include_adult=false"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        series = response.json().get('results', [])
+        return [
+            {
+                'id': show['id'],
+                'title': show.get('name', 'Sin título'),
+                'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
+                'vote_average': show.get('vote_average', 0),
+                'release_date': show.get('first_air_date', ''),
+            } for show in series
+        ]
+    except requests.RequestException as e:
+        print(f"Error en search_tv_shows: {e}")
+        return []
