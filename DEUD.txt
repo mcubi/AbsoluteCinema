@@ -6,3 +6,11 @@
 
 - WEBSOCKET:
     -settings.py [InMemoryChannelLayer] debe ser reemplazado por [Redis]
+
+
+
+
+
+# POR SI SE HACEN MAS CAMBIOS : : 
+
+- docker compose up -d --build -> reconstruye de nuevo con todos los cambios
