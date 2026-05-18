@@ -1,8 +1,8 @@
-# AQUI LAS DEUDAS TECNICAS DEL PROYECTO HASTA NUEVO AVISO  ----- FICHERO PARA DESTRUIR AL FINALIZAR
+# DEUDAS PARA PRODUCCION
 
-DEUDAS PENDIENTES:
+- DEVOPS:
+    - Debe colocarse un volumen en la dockerización del proyecto y excluir la BBDD de la rama principal y definitiva del proyecto (security purposes)
+    - .env también debe ser ocultado
 
-1. Registro y login / JSON
-2. APP_NAME's = {}
-3. Migrar a Tailwind como aplicación
-4.
+- WEBSOCKET:
+    -settings.py [InMemoryChannelLayer] debe ser reemplazado por [Redis]
