@@ -2,10 +2,10 @@ import random
 import json
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies, get_tv_shows, get_tv_show_details, get_person_details
-from .models import MiLista
+from .models import MiLista, Review
 
 # HOMEPAGE FUNCTION 
 def index_devolution(request):
@@ -217,3 +217,72 @@ def detalle_actor(request, person_id):
     return render(request, 'movies/actor.html', {
         'persona': persona,
     })
+    
+# WEBSOCKET VIEW FUNCTION:
+
+
+# GET REV
+
+# --- API PARA OBTENER RESEÑAS (FALLBACK WEBSOCKET) ---
+@require_GET
+def get_reviews_api(request, movie_id):
+    try:
+        reviews = Review.objects.filter(movie_id=movie_id).select_related('user').order_by('-created_at')
+        
+        reviews_data = []
+        for review in reviews:
+            reviews_data.append({
+                'id': review.id,
+                'user': review.user.username,
+                'rating': review.rating,
+                'content': review.content,
+                'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
+                'avatar': review.user.perfil.avatar.url if hasattr(review.user, 'perfil') and review.user.perfil.avatar else '/static/img/default-avatar.png'
+            })
+        
+        return JsonResponse({
+            'reviews': reviews_data,
+            'count': len(reviews_data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# POST REV
+
+@login_required
+@require_POST
+def add_review_api(request, movie_id):
+    try:
+        data = json.loads(request.body)
+        rating = data.get('rating')
+        content = data.get('content')
+        movie_title = data.get('movie_title', '')
+        
+        if not rating or not content:
+            return JsonResponse({'error': 'La puntuación y el contenido son obligatorios'}, status=400)
+        
+        # Crear nueva reseña
+        review = Review.objects.create(
+            user=request.user,
+            movie_id=movie_id,
+            movie_title=movie_title,
+            rating=rating,
+            content=content
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'review': {
+                'id': review.id,
+                'user': review.user.username,
+                'rating': review.rating,
+                'content': review.content,
+                'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
+                'avatar': review.user.perfil.avatar.url if hasattr(review.user, 'perfil') and review.user.perfil.avatar else '/static/img/default-avatar.png'
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

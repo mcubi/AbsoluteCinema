@@ -10,4 +10,9 @@ urlpatterns = [
     path('series/', views.catalogo_series, name='series'),
     path('serie/<str:series_id>/', views.detalle_serie, name='detalle_serie'),
     path('actor/<int:person_id>/', views.detalle_actor, name='detalle_actor'),
+    
+    # WEBSOCKET FUNCT URLS:
+        # API URLs for reviews
+    path('api/reviews/<int:movie_id>/', views.get_reviews_api, name='get_reviews'),
+    path('api/reviews/<int:movie_id>/add/', views.add_review_api, name='add_review'),
 ]
