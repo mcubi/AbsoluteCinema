@@ -147,5 +147,12 @@
         alert("Hubo un error al intentar borrar la película. Inténtalo de nuevo.");
     });
   }
+
+  // 3. LOGICA PARA FORZAR RECARGA AL VOLVER ATRÁS (EVITAR CACHÉ FANTASMA DEL NAVEGADOR)
+  window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+          location.reload();
+      }
+  });
 </script>
 {% endblock %}

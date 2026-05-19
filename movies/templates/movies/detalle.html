@@ -1,449 +1,222 @@
 {% extends 'base.html' %}
-<!---->
 {% load static %}
-<!---->
-{% block title %}
-<!---->
-{{ pelicula.title}} | Reseñas - Absolute Cinema {% endblock %}
-<!---->
-{% block content %}
 
-<!--MAIN CONTAINER-->
+{% block title %}
+{{ pelicula.title}} | Reseñas - Absolute Cinema 
+{% endblock %}
+
+{% block content %}
 <div class="bg-white dark:bg-ac-bg min-h-screen">
   <div class="container mx-auto px-4 py-8 pt-24">
-    <!--to return to the main menu-->
     <div class="mb-6">
-      <a
-        href="javascript:history.back()"
-        class="text-gray-500 dark:text-gray-400 hover:text-ac-primary transition text-sm flex items-center gap-2 w-fit"
-      >
+      <a href="javascript:history.back()" class="text-gray-500 dark:text-gray-400 hover:text-ac-primary transition text-sm flex items-center gap-2 w-fit">
         <i class="fas fa-arrow-left"></i> Volver atrás
       </a>
     </div>
 
-    <!--MOVIE HEADER SECTION-->
     <div class="flex flex-col md:flex-row gap-8 mb-8">
-      <!--poster column-->
       <div class="md:w-1/4">
-        <div
-          class="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.2)]"
-        >
-          <img
-            src="{{ pelicula.poster_url|default:'https://via.placeholder.com/500x750?text=No+Poster' }}"
-            alt="{{ pelicula.title }}"
-            class="w-full"
-          />
+        <div class="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.2)]">
+          <img src="{{ pelicula.poster_url|default:'https://via.placeholder.com/500x750?text=No+Poster' }}" alt="{{ pelicula.title }}" class="w-full" />
         </div>
 
-        <!--for the trailer  ARREGLAR-->
         <div class="mt-4 flex gap-2">
-          <a
-            href="https://www.youtube.com/results?search_query={{ pelicula.title|urlencode }}+trailer+oficial+español"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white px-4 py-3 rounded-lg font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition hover:-translate-y-1 flex items-center justify-center gap-2"
-          >
+          <a href="https://www.youtube.com/results?search_query={{ pelicula.title|urlencode }}+trailer+oficial+español" target="_blank" rel="noopener noreferrer" class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white px-4 py-3 rounded-lg font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition hover:-translate-y-1 flex items-center justify-center gap-2">
             <i class="fas fa-play"></i> VER TRÁILER
           </a>
 
-          <button
-            onclick="addToList(this, '{{ pelicula.id }}', '{{ pelicula.title|escapejs }}')"
-            class="{% if pelicula.id in mis_peliculas_ids %}added !bg-ac-primary !text-white !border-ac-primary{% else %}bg-gray-100 dark:bg-[#181818] text-gray-900 dark:text-white border border-gray-200 dark:border-white/10{% endif %} hover:bg-gray-200 dark:hover:bg-white/10 px-4 py-3 rounded-lg font-bold transition hover:-translate-y-1 flex items-center justify-center w-[52px] shrink-0 shadow-lg"
-          >
-            <i
-              class="fas {% if pelicula.id in mis_peliculas_ids %}fa-check{% else %}fa-plus{% endif %} transition-transform duration-200 text-lg"
-            ></i>
+          <button type="button" onclick="toggleDetalleLista(this, '{{ pelicula.id }}', '{{ pelicula.title|escapejs }}')" 
+                  class="w-[52px] shrink-0 rounded-lg flex items-center justify-center transition hover:-translate-y-1 shadow-lg {% if pelicula.id in mis_peliculas_ids %}added bg-ac-primary text-white border-ac-primary{% else %}bg-gray-100 dark:bg-[#181818] text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 hover:border-ac-primary hover:text-ac-primary{% endif %}"
+                  title="Añadir a mi lista">
+              <i class="fas {% if pelicula.id in mis_peliculas_ids %}fa-check{% else %}fa-plus{% endif %} text-lg transition-transform duration-200"></i>
           </button>
         </div>
 
-        <!--streaming info-->
-        <div
-          class="mt-6 text-center bg-gray-100 dark:bg-[#181818] rounded-xl p-4 border border-gray-200 dark:border-white/5"
-        >
-          <p
-            class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-3"
-          >
+        <div class="mt-6 text-center bg-gray-100 dark:bg-[#181818] rounded-xl p-4 border border-gray-200 dark:border-white/5">
+          <p class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-3">
             DISPONIBLE EN
           </p>
           <div class="flex items-center justify-center flex-wrap gap-3">
-            {% if pelicula.providers %} {% for provider in pelicula.providers %}
-            <img
-              src="{{ provider.logo_url }}"
-              alt="{{ provider.name }}"
-              title="{{ provider.name }}"
-              class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-gray-200 dark:border-white/10 hover:scale-110 transition cursor-help"
-            />
-            {% endfor %} {% else %}
-            <span class="text-gray-500 dark:text-gray-400 text-xs italic"
-              >No disponible en streaming</span
-            >
+            {% if pelicula.providers %} 
+              {% for provider in pelicula.providers %}
+              <img src="{{ provider.logo_url }}" alt="{{ provider.name }}" title="{{ provider.name }}" class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-gray-200 dark:border-white/10 hover:scale-110 transition cursor-help" />
+              {% endfor %} 
+            {% else %}
+              <span class="text-gray-500 dark:text-gray-400 text-xs italic">No disponible en streaming</span>
             {% endif %}
           </div>
         </div>
-
-        <!--info-->
       </div>
+
       <div class="md:w-3/4 text-gray-900 dark:text-white">
-        <!--Title and badges-->
-        <h1
-          class="text-4xl md:text-6xl font-brand tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-700 dark:to-gray-300 mb-2"
-        >
+        <h1 class="text-4xl md:text-6xl font-brand tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-700 dark:to-gray-300 mb-2">
           {{ pelicula.title }}
         </h1>
 
-        <!--Serie/TV badge and details-->
-        <div
-          class="flex items-center gap-3 flex-wrap mb-6 text-sm font-semibold"
-        >
-          <span
-            class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300"
-          >
+        <div class="flex items-center gap-3 flex-wrap mb-6 text-sm font-semibold">
+          <span class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">
             {% if pelicula.id < 0 %}Serie TV{% else %}Película{% endif %}
           </span>
           <span class="text-ac-primary">•</span>
 
-          <span class="text-gray-600 dark:text-gray-300"
-            >{{ pelicula.release_date|slice:":4"|default:"N/A" }}</span
-          >
+          <span class="text-gray-600 dark:text-gray-300">{{ pelicula.release_date|slice:":4"|default:"N/A" }}</span>
 
           <span class="text-ac-primary">•</span>
           <span class="text-gray-600 dark:text-gray-300">
-            {% if pelicula.id < 0 %} {{ pelicula.number_of_seasons|default:"?"
-            }} Temp. ({{ pelicula.number_of_episodes|default:"?" }} Eps.) {%
-            else %} {{ pelicula.runtime|default:"0" }} min {% endif %}
+            {% if pelicula.id < 0 %}
+                {{ pelicula.number_of_seasons|default:"?" }} Temp. ({{ pelicula.number_of_episodes|default:"?" }} Eps.)
+            {% else %}
+                {{ pelicula.runtime|default:"0" }} min
+            {% endif %}
           </span>
 
           <span class="text-ac-primary">•</span>
-          <span class="text-gray-600 dark:text-gray-300 uppercase"
-            >{{ pelicula.original_language }}</span
-          >
+          <span class="text-gray-600 dark:text-gray-300 uppercase">{{ pelicula.original_language }}</span>
         </div>
 
-        <!--Tagline-->
         {% if pelicula.tagline %}
-        <p
-          class="text-ac-primary font-medium italic text-lg mb-6 border-l-2 border-ac-primary pl-3"
-        >
+        <p class="text-ac-primary font-medium italic text-lg mb-6 border-l-2 border-ac-primary pl-3">
           {{ pelicula.tagline }}
         </p>
         {% endif %}
 
-        <!--Synopsis-->
-        <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">
-          Sinopsis
-        </h2>
-        <p
-          class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8 max-w-4xl font-light"
-        >
+        <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">Sinopsis</h2>
+        <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8 max-w-4xl font-light">
           {{ pelicula.overview|default:"Sin sinopsis disponible en español." }}
         </p>
 
-        <!--tabs-->
-        <div
-          class="flex flex-wrap gap-6 mb-8 border-b border-gray-200 dark:border-white/10 pb-2"
-        >
-          <a
-            href="#"
-            class="text-ac-primary border-b-2 border-ac-primary pb-2 text-sm font-bold uppercase tracking-wider"
-            >Info Principal</a
-          >
-          <a
-            href="#reviews"
-            class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-bold uppercase tracking-wider"
-            >Reseñas</a
-          >
+        <div class="flex flex-wrap gap-6 mb-8 border-b border-gray-200 dark:border-white/10 pb-2">
+          <a href="#" class="text-ac-primary border-b-2 border-ac-primary pb-2 text-sm font-bold uppercase tracking-wider">Info Principal</a>
+          <a href="#reviews" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-bold uppercase tracking-wider">Reseñas</a>
         </div>
 
-        <!--RATING SECTION-->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <div
-            class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition"
-          >
-            <div
-              class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold"
-            >
-              NOTA TMDB
-            </div>
+          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
+            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">NOTA TMDB</div>
             <div class="flex items-center justify-center gap-2">
               <i class="fas fa-star text-yellow-500 text-2xl"></i>
-              <span class="text-3xl font-bold text-gray-900 dark:text-white"
-                >{{ pelicula.vote_average|floatformat:1|default:"0.0" }}</span
-              >
+              <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ pelicula.vote_average|floatformat:1|default:"0.0" }}</span>
             </div>
-            <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">
-              {{ pelicula.vote_count }} votos
-            </div>
+            <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ pelicula.vote_count }} votos</div>
           </div>
 
-          <!--User rating ARREGLAR (marcos haz una funcion de puntuar pls)-->
-          <div
-            class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition"
-          >
-            <div
-              class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold"
-            >
-              TU PUNTUACIÓN
-            </div>
-            <a
-              href="#"
-              class="flex flex-col items-center justify-center gap-1 group cursor-pointer"
-            >
-              <i
-                class="far fa-star text-2xl text-gray-500 dark:text-gray-500 group-hover:text-ac-primary transition transform group-hover:scale-110"
-              ></i>
-              <span
-                class="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:roup-hover:text-white text-xs transition"
-                >Haz clic para puntuar</span
-              >
+          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
+            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">TU PUNTUACIÓN</div>
+            <a href="#" class="flex flex-col items-center justify-center gap-1 group cursor-pointer">
+              <i class="far fa-star text-2xl text-gray-500 dark:text-gray-500 group-hover:text-ac-primary transition transform group-hover:scale-110"></i>
+              <span class="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:roup-hover:text-white text-xs transition">Haz clic para puntuar</span>
             </a>
           </div>
 
-          <!--Status-->
-          <div
-            class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition"
-          >
-            <div
-              class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold"
-            >
-              ESTADO
-            </div>
+          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
+            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">ESTADO</div>
             <div class="text-2xl font-bold text-ac-primary mt-1">
-              {% if pelicula.release_date %}Estrenada{% else %}Próximamente
-              <!---->
-              {% endif %}
+              {% if pelicula.release_date %}Estrenada{% else %}Próximamente{% endif %}
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!--CAST SECTION-->
     {% if pelicula.cast %}
     <div class="mb-10 mt-4">
-      <h2
-        class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3"
-      >
-        Reparto y equipo
-      </h2>
-      <div
-        class="flex overflow-x-auto gap-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
-      >
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Reparto y equipo</h2>
+      <div class="flex overflow-x-auto gap-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
         {% for actor in pelicula.cast|slice:":12" %}
-
-        <div
-          class="text-center min-w-[100px] group cursor-pointer"
-          onclick="window.location.href='/actor/{{ actor.id }}/'"
-        >
-          <div
-            class="w-24 h-24 rounded-full bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300"
-          >
+        <div class="text-center min-w-[100px] group cursor-pointer" onclick="window.location.href='/actor/{{ actor.id }}/'">
+          <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300">
             {% if actor.profile_path %}
-            <img
-              src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}"
-              alt="{{ actor.name }}"
-              class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-            />
+            <img src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}" alt="{{ actor.name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
             {% else %}
-            <div
-              class="w-full h-full flex items-center justify-center text-3xl bg-gray-200 dark:bg-gray-800"
-            >
+            <div class="w-full h-full flex items-center justify-center text-3xl bg-gray-200 dark:bg-gray-800">
               <i class="fas fa-user text-gray-500 dark:text-gray-500"></i>
             </div>
             {% endif %}
           </div>
-          <p
-            class="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-ac-primary transition"
-          >
-            {{ actor.name }}
-          </p>
-          <p
-            class="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate px-1"
-            title="{{ actor.character }}"
-          >
-            {{ actor.character }}
-          </p>
+          <p class="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-ac-primary transition">{{ actor.name }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate px-1" title="{{ actor.character }}">{{ actor.character }}</p>
         </div>
         {% endfor %}
       </div>
     </div>
     {% endif %}
 
-    <!--DIRECTOR-->
     {% if pelicula.director %}
     <div class="mb-8">
-      <h2
-        class="text-xl font-bold text-gray-900 dark:text-white mb-2 border-l-4 border-ac-primary pl-3"
-      >
-        Director
-      </h2>
-      <p class="text-gray-700 dark:text-gray-300 text-base">
-        {{ pelicula.director }}
-      </p>
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 border-l-4 border-ac-primary pl-3">Director</h2>
+      <p class="text-gray-700 dark:text-gray-300 text-base">{{ pelicula.director }}</p>
     </div>
     {% endif %}
 
-    <!--GENRES-->
     <div class="mb-12">
-      <h2
-        class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3"
-      >
-        Géneros
-      </h2>
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Géneros</h2>
       <div class="flex flex-wrap gap-2">
         {% for genre in pelicula.genres %}
-        <span
-          class="bg-gray-100 dark:bg-white/10 px-4 py-1.5 rounded-full text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5"
-          >{{ genre.name }}</span
-        >
+        <span class="bg-gray-100 dark:bg-white/10 px-4 py-1.5 rounded-full text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5">{{ genre.name }}</span>
         {% endfor %}
       </div>
     </div>
 
-    <!-- W E B S O C K E T | I N T E G R A T I O N -->
-    <!--USER REVIEWS SECTION (WebSocket + Polling fallback)-->
     <div id="reviews" class="mb-12">
-      <div
-        class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-white/10 pb-4"
-      >
-        <h2
-          class="text-xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3"
-        >
+      <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-white/10 pb-4">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
           Reseñas de usuarios
-          <span id="review-count" class="text-sm text-gray-500 font-normal ml-2"
-            >0 reseñas</span
-          >
+          <span id="review-count" class="text-sm text-gray-500 font-normal ml-2">0 reseñas</span>
         </h2>
         {% if user.is_authenticated %}
-        <button
-          onclick="toggleReviewForm()"
-          class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2"
-        >
+        <button onclick="toggleReviewForm()" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
           <i class="fas fa-pen"></i> Escribir Reseña
         </button>
         {% else %}
-        <button
-          onclick="redirectToRegister()"
-          class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2"
-        >
+        <button onclick="redirectToRegister()" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
           <i class="fas fa-pen"></i> Escribir Reseña
         </button>
         {% endif %}
       </div>
 
-      <!-- Formulario para añadir reseña -->
-      <div
-        id="review-form"
-        class="hidden mb-8 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl p-6 border border-gray-200 dark:border-white/5"
-      >
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-          Escribe tu reseña
-        </h3>
+      <div id="review-form" class="hidden mb-8 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl p-6 border border-gray-200 dark:border-white/5">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Escribe tu reseña</h3>
         <form id="review-form-element" class="space-y-4">
           <div>
-            <label
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >Puntuación</label
-            >
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puntuación</label>
             <div class="flex gap-2" id="rating-stars">
-              <button
-                type="button"
-                onclick="setRating(1)"
-                class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"
-              >
-                <i class="fas fa-star"></i>
-              </button>
-              <button
-                type="button"
-                onclick="setRating(2)"
-                class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"
-              >
-                <i class="fas fa-star"></i>
-              </button>
-              <button
-                type="button"
-                onclick="setRating(3)"
-                class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"
-              >
-                <i class="fas fa-star"></i>
-              </button>
-              <button
-                type="button"
-                onclick="setRating(4)"
-                class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"
-              >
-                <i class="fas fa-star"></i>
-              </button>
-              <button
-                type="button"
-                onclick="setRating(5)"
-                class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"
-              >
-                <i class="fas fa-star"></i>
-              </button>
+              <button type="button" onclick="setRating(1)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"><i class="fas fa-star"></i></button>
+              <button type="button" onclick="setRating(2)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"><i class="fas fa-star"></i></button>
+              <button type="button" onclick="setRating(3)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"><i class="fas fa-star"></i></button>
+              <button type="button" onclick="setRating(4)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"><i class="fas fa-star"></i></button>
+              <button type="button" onclick="setRating(5)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"><i class="fas fa-star"></i></button>
             </div>
             <input type="hidden" id="rating" name="rating" value="0" required />
           </div>
-
           <div>
-            <label
-              for="content"
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >Tu reseña</label
-            >
-            <textarea
-              id="content"
-              name="content"
-              rows="4"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-ac-primary focus:border-transparent dark:bg-[#2a2a2a] dark:text-white"
-              placeholder="Comparte tu opinión sobre esta película..."
-              required
-            ></textarea>
+            <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tu reseña</label>
+            <textarea id="content" name="content" rows="4" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-ac-primary focus:border-transparent dark:bg-[#2a2a2a] dark:text-white" placeholder="Comparte tu opinión sobre esta película..." required></textarea>
           </div>
-
           <div class="flex gap-3">
-            <button
-              type="submit"
-              class="bg-ac-primary hover:bg-ac-primary-dark text-white px-6 py-2 rounded-lg text-sm font-bold transition"
-            >
+            <button type="submit" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-6 py-2 rounded-lg text-sm font-bold transition">
               <i class="fas fa-paper-plane"></i> Publicar Reseña
             </button>
-            <button
-              type="button"
-              onclick="toggleReviewForm()"
-              class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg text-sm font-bold transition"
-            >
+            <button type="button" onclick="toggleReviewForm()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg text-sm font-bold transition">
               Cancelar
             </button>
           </div>
         </form>
       </div>
 
-      <!-- Lista de reseñas -->
-      <div id="reviews-list" class="space-y-4">
-        <!-- Las reseñas se cargarán aquí vía WebSocket -->
-      </div>
+      <div id="reviews-list" class="space-y-4"></div>
 
-      <!-- Estado de conexión -->
-      <div
-        id="connection-status"
-        class="text-center py-4 text-sm text-gray-500"
-      >
+      <div id="connection-status" class="text-center py-4 text-sm text-gray-500">
         <i class="fas fa-spinner fa-spin"></i> Conectando...
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
-<!---->
+
 {% block extra_js %}
 <script>
-  // Forzar recarga evitando caché - Versión: {% now 'U' %}
-  console.log(
-    "Cargando reseñas WebSocket - v",
-    "{{ pelicula.id }}",
-    new Date().getTime(),
-  );
-  // Variables globales
+  console.log("Cargando reseñas WebSocket - v", "{{ pelicula.id }}", new Date().getTime());
+  
   let socket = null;
   let currentRating = 0;
   let movieId = "{{ pelicula.id }}";
@@ -451,90 +224,47 @@
   let pollingInterval = null;
   let initialReviewsLoaded = false;
 
-  // Función para conectar al WebSocket (con fallback a polling)
   function connectWebSocket() {
-    console.log("Intentando conectar WebSocket con movieId:", movieId);
-
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/reviews/${movieId}/`;
-    console.log("URL WebSocket:", wsUrl);
-
+    
     try {
       socket = new WebSocket(wsUrl);
-
       socket.onopen = function (e) {
-        console.log("✅ Conectado al WebSocket de reseñas");
-        document.getElementById("connection-status").innerHTML =
-          '<i class="fas fa-check-circle text-green-500"></i> Conectado (WebSocket)';
-
-        // Solo cargar reseñas existentes si no hay ninguna en el DOM
+        document.getElementById("connection-status").innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Conectado (WebSocket)';
         const reviewsList = document.getElementById("reviews-list");
-        if (
-          reviewsList.children.length === 0 ||
-          reviewsList.querySelector(".fa-comment-slash")
-        ) {
-          socket.send(
-            JSON.stringify({
-              action: "get_reviews",
-            }),
-          );
+        if (reviewsList.children.length === 0 || reviewsList.querySelector(".fa-comment-slash")) {
+          socket.send(JSON.stringify({ action: "get_reviews" }));
         }
       };
 
       socket.onmessage = function (e) {
-        console.log("📨 Mensaje recibido:", e.data);
         const data = JSON.parse(e.data);
         handleWebSocketMessage(data);
       };
 
       socket.onclose = function (e) {
-        console.log("❌ Desconectado del WebSocket", e);
-        document.getElementById("connection-status").innerHTML =
-          '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
-
-        // Cambiar a polling si WebSocket falla
+        document.getElementById("connection-status").innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
         startPolling();
       };
 
       socket.onerror = function (e) {
-        console.error("🚨 Error en WebSocket:", e);
-        document.getElementById("connection-status").innerHTML =
-          '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
-
-        // Cambiar a polling si hay error
+        document.getElementById("connection-status").innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
         startPolling();
       };
     } catch (error) {
-      console.error("❌ Error al crear WebSocket:", error);
-      document.getElementById("connection-status").innerHTML =
-        '<i class="fas fa-exclamation-triangle text-yellow-500"></i> WebSocket no disponible. Usando polling...';
-
-      // Usar polling como fallback
       startPolling();
     }
   }
 
-  // Función de polling como fallback
   function startPolling() {
-    if (pollingInterval) return; // Evitar múltiples intervalos
-
-    console.log("🔄 Iniciando polling para reseñas");
-    document.getElementById("connection-status").innerHTML =
-      '<i class="fas fa-sync text-blue-500"></i> Actualizando automáticamente (Polling)';
-
-    // Cargar reseñas iniciales (usando displayReviews para carga completa inicial)
+    if (pollingInterval) return;
+    document.getElementById("connection-status").innerHTML = '<i class="fas fa-sync text-blue-500"></i> Actualizando automáticamente (Polling)';
     fetch(`/api/reviews/${movieId}/`)
       .then((response) => response.json())
       .then((data) => {
-        if (data.reviews) {
-          displayReviews(data.reviews);
-        }
-      })
-      .catch((error) => {
-        console.error("Error cargando reseñas iniciales:", error);
+        if (data.reviews) { displayReviews(data.reviews); }
       });
-
-    // Configurar polling cada 5 segundos
     pollingInterval = setInterval(loadReviewsViaAJAX, 5000);
   }
 
@@ -543,53 +273,17 @@
       .then((response) => response.json())
       .then((data) => {
         if (data.reviews) {
-          console.log(
-            "📊 Polling: recibidas",
-            data.reviews.length,
-            "reseñas del servidor",
-          );
-          console.log(
-            "📋 Polling: IDs recibidos",
-            data.reviews.map((r) => r.id),
-          );
-
           const reviewsList = document.getElementById("reviews-list");
-          const existingReviewIds = Array.from(
-            reviewsList.querySelectorAll("[data-review-id]"),
-          ).map((el) => el.getAttribute("data-review-id"));
-
-          console.log("📋 Polling: IDs existentes en DOM", existingReviewIds);
-
-          const newReviews = data.reviews.filter(
-            (review) => !existingReviewIds.includes(review.id.toString()),
-          );
-
-          console.log(
-            "🆕 Polling: reseñas nuevas para añadir",
-            newReviews.length,
-            newReviews.map((r) => r.id),
-          );
-
+          const existingReviewIds = Array.from(reviewsList.querySelectorAll("[data-review-id]")).map((el) => el.getAttribute("data-review-id"));
+          const newReviews = data.reviews.filter((review) => !existingReviewIds.includes(review.id.toString()));
           if (newReviews.length > 0) {
             newReviews.forEach((review) => addReviewToList(review));
           }
-
-          // Actualizar contador
-          const currentReviews =
-            reviewsList.querySelectorAll("[data-review-id]").length;
-          console.log(
-            "🔢 Polling: total reseñas en DOM después de actualizar",
-            currentReviews,
-          );
-          updateReviewCount(currentReviews);
+          updateReviewCount(reviewsList.querySelectorAll("[data-review-id]").length);
         }
-      })
-      .catch((error) => {
-        console.error("Error cargando reseñas:", error);
       });
   }
 
-  // Manejar mensajes del WebSocket
   function handleWebSocketMessage(data) {
     if (data.action === "reviews_list") {
       displayReviews(data.reviews);
@@ -600,17 +294,10 @@
     }
   }
 
-  // Mostrar lista de reseñas (solo para carga inicial vía WebSocket)
   function displayReviews(reviews) {
     const reviewsList = document.getElementById("reviews-list");
-
-    // Solo limpiar si está vacío o tiene el mensaje de "no hay reseñas"
-    if (
-      reviewsList.children.length === 0 ||
-      reviewsList.querySelector(".fa-comment-slash")
-    ) {
+    if (reviewsList.children.length === 0 || reviewsList.querySelector(".fa-comment-slash")) {
       reviewsList.innerHTML = "";
-
       if (reviews.length === 0) {
         reviewsList.innerHTML = `
           <div class="text-center py-16 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/5">
@@ -622,69 +309,23 @@
         reviews.forEach((review) => addReviewToList(review));
       }
     } else {
-      // Si ya hay reseñas, solo añadir las nuevas (por ID)
-      const existingReviewIds = Array.from(
-        reviewsList.querySelectorAll("[data-review-id]"),
-      ).map((el) => el.getAttribute("data-review-id"));
-
-      const newReviews = reviews.filter(
-        (review) => !existingReviewIds.includes(review.id.toString()),
-      );
-
-      console.log(
-        "📊 displayReviews: Reseñas existentes en DOM:",
-        existingReviewIds.length,
-      );
-      console.log(
-        "📊 displayReviews: Reseñas recibidas del servidor:",
-        reviews.length,
-      );
-      console.log(
-        "📊 displayReviews: Reseñas nuevas para añadir:",
-        newReviews.length,
-      );
-
+      const existingReviewIds = Array.from(reviewsList.querySelectorAll("[data-review-id]")).map((el) => el.getAttribute("data-review-id"));
+      const newReviews = reviews.filter((review) => !existingReviewIds.includes(review.id.toString()));
       newReviews.forEach((review) => addReviewToList(review));
     }
-
-    // Actualizar contador
-    const currentReviews =
-      reviewsList.querySelectorAll("[data-review-id]").length;
-    updateReviewCount(currentReviews);
+    updateReviewCount(reviewsList.querySelectorAll("[data-review-id]").length);
   }
 
-  // Añadir reseña a la lista
   function addReviewToList(review) {
-    console.log("➕ Añadiendo reseña:", review.id, "por", review.user);
-
     const reviewsList = document.getElementById("reviews-list");
-    console.log(
-      "📋 Antes de añadir - reseñas en DOM:",
-      reviewsList.children.length,
-    );
-
-    // Si es el primer mensaje, limpiar el "no hay reseñas"
     if (reviewsList.querySelector(".fa-comment-slash")) {
-      console.log('🧹 Limpiando mensaje de "no hay reseñas"');
       reviewsList.innerHTML = "";
     }
-
-    // Verificar si ya existe esta reseña
-    const existingReview = reviewsList.querySelector(
-      `[data-review-id="${review.id}"]`,
-    );
-    if (existingReview) {
-      console.log(
-        "⚠️ La reseña",
-        review.id,
-        "ya existe en el DOM, no se añade",
-      );
-      return;
-    }
+    const existingReview = reviewsList.querySelector(`[data-review-id="${review.id}"]`);
+    if (existingReview) return;
 
     const reviewElement = document.createElement("div");
-    reviewElement.className =
-      "bg-gray-50 dark:bg-[#1a1a1a] rounded-xl p-6 border border-gray-200 dark:border-white/5";
+    reviewElement.className = "bg-gray-50 dark:bg-[#1a1a1a] rounded-xl p-6 border border-gray-200 dark:border-white/5";
     reviewElement.setAttribute("data-review-id", review.id);
     reviewElement.innerHTML = `
       <div class="flex items-start gap-4">
@@ -702,16 +343,10 @@
         </div>
       </div>
     `;
-
     reviewsList.insertBefore(reviewElement, reviewsList.firstChild);
-    console.log(
-      "📋 Después de añadir - reseñas en DOM:",
-      reviewsList.children.length,
-    );
     updateReviewCount(reviewsList.children.length);
   }
 
-  // Generar estrellas HTML
   function generateStars(rating) {
     let stars = "";
     for (let i = 1; i <= 5; i++) {
@@ -724,24 +359,17 @@
     return stars;
   }
 
-  // Actualizar contador de reseñas
   function updateReviewCount(count) {
-    const countElement = document.getElementById("review-count");
-    countElement.textContent = `${count} reseña${count !== 1 ? "s" : ""}`;
+    document.getElementById("review-count").textContent = `${count} reseña${count !== 1 ? "s" : ""}`;
   }
 
-  // Mostrar/ocultar formulario
   function toggleReviewForm() {
-    const form = document.getElementById("review-form");
-    form.classList.toggle("hidden");
+    document.getElementById("review-form").classList.toggle("hidden");
   }
 
-  // Establecer puntuación
   function setRating(rating) {
     currentRating = rating;
     document.getElementById("rating").value = rating;
-
-    // Actualizar estrellas visuales
     const stars = document.querySelectorAll(".star-btn i");
     stars.forEach((star, index) => {
       if (index < rating) {
@@ -754,102 +382,52 @@
     });
   }
 
-  // Enviar reseña
   const reviewForm = document.getElementById("review-form-element");
   if (reviewForm) {
     reviewForm.addEventListener("submit", function (e) {
       e.preventDefault();
-
       const content = document.getElementById("content").value.trim();
+      if (currentRating === 0) { alert("Por favor, selecciona una puntuación"); return; }
+      if (!content) { alert("Por favor, escribe una reseña"); return; }
 
-      if (currentRating === 0) {
-        alert("Por favor, selecciona una puntuación");
-        return;
-      }
-
-      if (!content) {
-        alert("Por favor, escribe una reseña");
-        return;
-      }
-
-      // Intentar enviar por WebSocket primero
-      console.log("WebSocket state:", socket ? socket.readyState : "null");
       if (socket && socket.readyState === WebSocket.OPEN) {
-        console.log("Enviando reseña por WebSocket");
-        socket.send(
-          JSON.stringify({
-            action: "add_review",
-            rating: currentRating,
-            content: content,
-            movie_title: movieTitle,
-          }),
-        );
-
-        // Limpiar formulario
+        socket.send(JSON.stringify({ action: "add_review", rating: currentRating, content: content, movie_title: movieTitle }));
         document.getElementById("content").value = "";
         setRating(0);
         toggleReviewForm();
       } else {
-        console.log("WebSocket no disponible, usando API fallback");
-        // Usar API fallback
         sendReviewViaAPI();
       }
     });
   }
 
-  // Función para enviar reseña vía API (fallback)
   function sendReviewViaAPI() {
     const content = document.getElementById("content").value.trim();
-
     fetch(`/api/reviews/${movieId}/add/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
-      },
-      body: JSON.stringify({
-        rating: currentRating,
-        content: content,
-        movie_title: movieTitle,
-      }),
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+      body: JSON.stringify({ rating: currentRating, content: content, movie_title: movieTitle }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // Añadir la reseña a la lista
           addReviewToList(data.review);
-
-          // Limpiar formulario
           document.getElementById("content").value = "";
           setRating(0);
           toggleReviewForm();
-
-          // Actualizar contador
-          const reviewsList = document.getElementById("reviews-list");
-          updateReviewCount(reviewsList.children.length);
+          updateReviewCount(document.getElementById("reviews-list").children.length);
         } else {
           alert(data.error || "Error al enviar la reseña");
         }
-      })
-      .catch((error) => {
-        console.error("Error enviando reseña:", error);
-        alert("Error de conexión. Intenta recargar la página.");
       });
   }
 
-  // Función para redirigir a registro
   function redirectToRegister() {
-    // Mostrar mensaje informativo
-    if (
-      confirm(
-        "Para escribir una reseña necesitas estar registrado. ¿Te gustaría registrarte ahora?",
-      )
-    ) {
+    if (confirm("Para escribir una reseña necesitas estar registrado. ¿Te gustaría registrarte ahora?")) {
       window.location.href = "/users/register";
     }
   }
 
-  // Función para obtener CSRF token
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -865,25 +443,65 @@
     return cookieValue;
   }
 
-  // Función existente (sin alterar)
-  function addToList(button, movieId, movieTitle) {
-    var isInList = button.classList.contains("added");
+  // --- FUNCIÓN DEL BOTÓN "+" TOTALMENTE INDEPENDIENTE ---
+  function toggleDetalleLista(button, movieId, movieTitle) {
+    const icon = button.querySelector('i');
+    
+    // Bloqueamos el botón 1 segundo para evitar doble click rápido
+    button.style.pointerEvents = "none";
+    if(icon) icon.style.transform = "scale(0) rotate(90deg)";
 
-    // modificar si eso
-    if (isInList) {
-      button.classList.remove("added", "bg-ac-primary", "border-ac-primary");
-      button.classList.add("border-gray-500", "text-gray-300");
-      button.innerHTML = '<i class="fas fa-plus text-sm"></i>';
-    } else {
-      button.classList.add("added", "bg-ac-primary", "border-ac-primary");
-      button.classList.remove("border-gray-500", "text-gray-300");
-      button.innerHTML = '<i class="fas fa-check text-sm"></i>';
-    }
+    // Hacemos la petición directa al servidor
+    fetch("/api/toggle-lista/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify({ movie_id: movieId, movie_title: movieTitle || '' }),
+    })
+    .then((response) => {
+      if (!response.ok) throw new Error("Error en la conexión");
+      return response.json();
+    })
+    .then((data) => {
+      if (data.error) throw new Error(data.error);
+
+      // Esperamos un poquito para que haga la animación suave
+      setTimeout(() => {
+        const isAdded = data.status === "added";
+
+        if (isAdded) {
+          // Pasarlo a activo (morado)
+          button.classList.remove("bg-gray-100", "dark:bg-[#181818]", "text-gray-900", "dark:text-white", "border-gray-200", "dark:border-white/10");
+          button.classList.add("added", "bg-ac-primary", "text-white", "border-ac-primary");
+          if(icon) {
+            icon.classList.remove("fa-plus");
+            icon.classList.add("fa-check");
+          }
+        } else {
+          // Pasarlo a inactivo (gris)
+          button.classList.remove("added", "bg-ac-primary", "text-white", "border-ac-primary");
+          button.classList.add("bg-gray-100", "dark:bg-[#181818]", "text-gray-900", "dark:text-white", "border-gray-200", "dark:border-white/10");
+          if(icon) {
+            icon.classList.remove("fa-check");
+            icon.classList.add("fa-plus");
+          }
+        }
+
+        // Devolvemos el icono a su tamaño original
+        if(icon) icon.style.transform = "scale(1) rotate(0deg)";
+        button.style.pointerEvents = "auto";
+      }, 150);
+    })
+    .catch((error) => {
+      // Si falla de verdad, restauramos el botón y avisamos
+      button.style.pointerEvents = "auto";
+      if(icon) icon.style.transform = "scale(1) rotate(0deg)";
+      console.error(error);
+      alert("Error al añadir a la lista. Inicia sesión o inténtalo de nuevo.");
+    });
   }
-
-  // Iniciar conexión WebSocket cuando se carga la página
-  document.addEventListener("DOMContentLoaded", function () {
-    connectWebSocket();
-  });
+  document.addEventListener("DOMContentLoaded", function () { connectWebSocket(); });
 </script>
 {% endblock %}
