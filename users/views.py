@@ -115,20 +115,35 @@ def mi_perfil(request):
 @login_required
 def configuracion(request):
     # get the actual user's profile
+    perfil = request.user.perfil
     user = request.user
     
     if request.method == 'POST':
-        form = PerfilForm(request.POST, request.FILES, user=user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Perfil actualizado correctamente")
-            return redirect('users:configuracion')
-    else:
-        form = PerfilForm(user=user)
+        # Recoger datos del formulario manual
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        telefono = request.POST.get('telefono')
+        avatar = request.FILES.get('avatar')
+        
+        # Actualizar usuario (esto cambia el nombre que aparece en el @)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+        
+        # Actualizar perfil
+        perfil.telefono = telefono
+        if avatar:
+            perfil.avatar = avatar
+        perfil.save()
+        
+        messages.success(request, "Perfil actualizado correctamente")
+        return redirect('users:configuracion')
     
     return render(request, 'users/configuracion.html', {
-        'form': form,
-        'perfil': user.perfil,
+        'perfil': perfil,
+        'user': user,
     })
 
 # ***********************************************************************************+
