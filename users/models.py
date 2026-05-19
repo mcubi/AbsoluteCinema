@@ -4,12 +4,13 @@ from django.contrib.auth.models import User # *1
 
 # MODELS:
 
-# Model - UserProfile => extends User model (Django default User model *1)
 class UserProfile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil') # 1 profile for every user
 
-    # Estos campos ya existen en el modelo User de Django, no es necesario duplicarlos.
+    # Estos campos se duplican para facilitar el acceso, pero la fuente principal es el modelo User.
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     telefono = models.CharField(max_length=20, unique=True, blank=True, null=True)
 
     # Optional field:
@@ -24,4 +25,8 @@ from django.dispatch import receiver
 @receiver(post_save, sender=User)
 def crear_perfil_usuario_nuevo(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance)
+        UserProfile.objects.create(
+            user=instance,
+            first_name=instance.first_name,
+            last_name=instance.last_name
+        )

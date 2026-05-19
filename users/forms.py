@@ -47,6 +47,20 @@ class RegistroForm(forms.Form):
             raise forms.ValidationError("Las contraseñas no coinciden.")
         return cleaned_data
     
+# *********************************************************************************
+# form login
+
+class LoginForm(forms.Form):
+    username = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'w-full bg-[#1a1a1a] border border-white/20 rounded-lg px-4 py-3 text-white focus:border-ac-primary focus:outline-none transition',
+        'placeholder': 'Nombre de usuario'
+    }))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': 'w-full bg-[#1a1a1a] border border-white/20 rounded-lg px-4 py-3 text-white focus:border-ac-primary focus:outline-none transition',
+        'placeholder': 'Contraseña'
+    }))
+
+
 
 # *********************************************************************************
 # form profile

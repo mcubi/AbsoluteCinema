@@ -198,6 +198,9 @@ SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+# Le decimos a Django cuál es nuestra página de inicio de sesión personalizada
+LOGIN_URL = 'users:log_in'
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         # Cargamos las credenciales desde el archivo .env

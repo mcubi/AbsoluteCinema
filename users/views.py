@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile # noqa
 from .forms import RegistroForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -10,6 +10,7 @@ from .forms import PerfilForm
 import os
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from .forms import LoginForm
 
 # ***********************************************************************************+
                                         # VIEWS
@@ -65,23 +66,23 @@ def register_user(request):
 
 def login_user(request):
     if request.method == 'POST':
-        # Pillamos los datos que envía el formulario HTML
-        usuario = request.POST.get('username')
-        contra = request.POST.get('password')
-        
-        # Django comprueba si existe y la contraseña es correcta
-        user = authenticate(request, username=usuario, password=contra)
-        
-        if user is not None:
-            # Si está todo OK, iniciamos la sesión
-            login(request, user)
-            # Y lo mandamos a la página principal (home)
-            return redirect('home')
-        else:
-            # Si falla, mandamos un mensaje de error
-            messages.error(request, "Usuario o contraseña incorrectos")
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
             
-    return render(request, 'users/login.html')
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.error(request, "Usuario o contraseña incorrectos")
+        else:
+            messages.error(request, "Por favor, corrige los errores en el formulario.")
+    else:
+        form = LoginForm()
+        
+    return render(request, 'users/login.html', {'form': form})
 
 # ***********************************************************************************+
 
@@ -175,7 +176,7 @@ def delete_account(request):
     # Delete user ==== PROFILE will be destroyed too cause of CASCADE condition in PROFILE MODEL
     user.delete()
     
-    messages.success(request, 'Tu cuenta ha sido eliminada permanentemente.')
+    messages.error(request, 'Tu cuenta ha sido eliminada permanentemente.')
     return redirect('home')
 
 # **************************************************************************************************+
