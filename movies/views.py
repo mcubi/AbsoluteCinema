@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
-from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies, get_tv_shows, get_tv_show_details, get_person_details, get_movie_genres, get_tv_genres, discover_movies, discover_tv_shows, search_movies, search_tv_shows
+from .tmdb_service import get_popular_movies, get_now_playing_movies, get_movie_details, get_top_rated_movies, get_random_popular_movies, get_tv_shows, get_tv_show_details, get_person_details, get_movie_genres, get_tv_genres, discover_movies, discover_tv_shows, search_movies, search_tv_shows, get_watch_providers
 from .models import MiLista, Review
 
 # HOMEPAGE FUNCTION 
@@ -83,17 +83,20 @@ def detalle_pelicula(request, movie_id):
 def catalogo_peliculas(request):
     filtro_actual = request.GET.get('filtro', 'populares')
     genero_actual = request.GET.get('genre')
+    provider_actual = request.GET.get('provider')
     query = request.GET.get('q')
     
     # Obtener la lista de géneros para el desplegable
     generos = get_movie_genres()
+    # Obtener la lista de plataformas
+    providers = get_watch_providers('movie')
 
     if query:
         # Si hay una consulta de búsqueda, buscamos por nombre
         peliculas = search_movies(query)
     else:
         # Si no, usamos los filtros de descubrimiento
-        peliculas = discover_movies(sort_by=filtro_actual, genre=genero_actual)
+        peliculas = discover_movies(sort_by=filtro_actual, genre=genero_actual, provider=provider_actual)
 
     mis_peliculas_ids = []
     if request.user.is_authenticated:
@@ -106,6 +109,8 @@ def catalogo_peliculas(request):
         'mis_peliculas_ids': mis_peliculas_ids,
         'genres': generos,
         'current_genre': genero_actual,
+        'providers': providers,
+        'current_provider': provider_actual,
         'query': query,
     })
 
@@ -174,17 +179,20 @@ def toggle_lista(request):
 def catalogo_series(request):
     filtro_actual = request.GET.get('filtro', 'populares')
     genero_actual = request.GET.get('genre')
+    provider_actual = request.GET.get('provider')
     query = request.GET.get('q')
 
     # Obtener la lista de géneros de series para el desplegable
     generos = get_tv_genres()
+    # Obtener la lista de plataformas
+    providers = get_watch_providers('tv')
 
     if query:
         # Si hay una consulta de búsqueda, buscamos por nombre
         series = search_tv_shows(query)
     else:
         # Si no, usamos los filtros de descubrimiento
-        series = discover_tv_shows(sort_by=filtro_actual, genre=genero_actual)
+        series = discover_tv_shows(sort_by=filtro_actual, genre=genero_actual, provider=provider_actual)
 
     mis_peliculas_ids = {}
     if request.user.is_authenticated:
@@ -197,6 +205,8 @@ def catalogo_series(request):
         'mis_peliculas_ids': mis_peliculas_ids,
         'genres': generos,
         'current_genre': genero_actual,
+        'providers': providers,
+        'current_provider': provider_actual,
         'query': query,
     })
 

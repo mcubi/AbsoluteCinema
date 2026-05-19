@@ -430,6 +430,26 @@ def get_tv_genres():
         print(f"Error al obtener géneros de series: {e}")
         return []
 
+# --- FUNCIÓN PARA OBTENER PROVEEDORES DE STREAMING ---
+def get_watch_providers(media_type='movie'):
+    """
+    Obtiene una lista de proveedores de streaming para España.
+    media_type puede ser 'movie' o 'tv'.
+    """
+    url = f"{BASE_URL}/watch/providers/{media_type}?api_key={API_KEY}&language=es-ES&watch_region=ES"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        # Ordenamos por popularidad (display_priority) para mostrar primero los más conocidos
+        providers = sorted(
+            response.json().get('results', []),
+            key=lambda p: p.get('display_priority', 999)
+        )
+        return providers
+    except requests.RequestException as e:
+        print(f"Error al obtener proveedores de streaming: {e}")
+        return []
+
 # --- FUNCIONES DE DISCOVER ---
 def discover_movies(sort_by='populares', genre=None, page=1):
     url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
@@ -464,7 +484,7 @@ def discover_movies(sort_by='populares', genre=None, page=1):
         print(f"Error en discover_movies: {e}")
         return []
 
-def discover_tv_shows(sort_by='populares', genre=None, page=1):
+def discover_tv_shows(sort_by='populares', genre=None, provider=None, page=1):
     url = f"{BASE_URL}/discover/tv?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
 
     sort_map = {
@@ -479,6 +499,9 @@ def discover_tv_shows(sort_by='populares', genre=None, page=1):
 
     if genre:
         url += f"&with_genres={genre}"
+
+    if provider:
+        url += f"&with_watch_providers={provider}&watch_region=ES"
 
     try:
         response = requests.get(url)
@@ -519,7 +542,7 @@ def get_tv_genres():
         return []
 
 # --- FUNCIONES DE DISCOVER ---
-def discover_movies(sort_by='populares', genre=None, page=1):
+def discover_movies(sort_by='populares', genre=None, provider=None, page=1):
     url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
 
     sort_map = {
@@ -534,6 +557,9 @@ def discover_movies(sort_by='populares', genre=None, page=1):
 
     if genre:
         url += f"&with_genres={genre}"
+
+    if provider:
+        url += f"&with_watch_providers={provider}&watch_region=ES"
 
     try:
         response = requests.get(url)
@@ -552,7 +578,7 @@ def discover_movies(sort_by='populares', genre=None, page=1):
         print(f"Error en discover_movies: {e}")
         return []
 
-def discover_tv_shows(sort_by='populares', genre=None, page=1):
+def discover_tv_shows(sort_by='populares', genre=None, provider=None, page=1):
     url = f"{BASE_URL}/discover/tv?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
 
     sort_map = {
@@ -567,6 +593,9 @@ def discover_tv_shows(sort_by='populares', genre=None, page=1):
 
     if genre:
         url += f"&with_genres={genre}"
+
+    if provider:
+        url += f"&with_watch_providers={provider}&watch_region=ES"
 
     try:
         response = requests.get(url)
