@@ -14,4 +14,5 @@ urlpatterns = [
         # API URLs for reviews (accept negative IDs for series)
     path('api/reviews/<str:movie_id>/', views.get_reviews_api, name='get_reviews'),
     path('api/reviews/<str:movie_id>/add/', views.add_review_api, name='add_review'),
+    path('api/reviews/delete/<int:review_id>/', views.delete_review_api, name='delete_review'),
 ]

@@ -223,6 +223,7 @@
   let movieTitle = "{{ pelicula.title|escapejs }}";
   let pollingInterval = null;
   let initialReviewsLoaded = false;
+  let currentUsername = "{{ user.username|default:'' }}";
 
   function connectWebSocket() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -324,6 +325,13 @@
     const existingReview = reviewsList.querySelector(`[data-review-id="${review.id}"]`);
     if (existingReview) return;
 
+    const isOwnReview = review.user === currentUsername;
+    const deleteButton = isOwnReview ? `
+      <button onclick="deleteReview(${review.id})" class="text-red-500 hover:text-red-700 text-sm font-medium transition flex items-center gap-1">
+        <i class="fas fa-trash"></i> Eliminar
+      </button>
+    ` : '';
+
     const reviewElement = document.createElement("div");
     reviewElement.className = "bg-gray-50 dark:bg-[#1a1a1a] rounded-xl p-6 border border-gray-200 dark:border-white/5";
     reviewElement.setAttribute("data-review-id", review.id);
@@ -333,7 +341,10 @@
         <div class="flex-1">
           <div class="flex items-center justify-between mb-2">
             <h4 class="font-bold text-gray-900 dark:text-white">${review.user}</h4>
-            <span class="text-sm text-gray-500">${review.created_at}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-sm text-gray-500">${review.created_at}</span>
+              ${deleteButton}
+            </div>
           </div>
           <div class="flex items-center gap-2 mb-3">
             ${generateStars(review.rating)}
@@ -426,6 +437,33 @@
     if (confirm("Para escribir una reseña necesitas estar registrado. ¿Te gustaría registrarte ahora?")) {
       window.location.href = "/users/register";
     }
+  }
+
+  function deleteReview(reviewId) {
+    if (!confirm("¿Estás seguro de que quieres eliminar esta reseña?")) {
+      return;
+    }
+
+    fetch(`/api/reviews/delete/${reviewId}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          const reviewElement = document.querySelector(`[data-review-id="${reviewId}"]`);
+          if (reviewElement) {
+            reviewElement.remove();
+            updateReviewCount(document.getElementById("reviews-list").children.length);
+          }
+        } else {
+          alert(data.error || "Error al eliminar la reseña");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Error al eliminar la reseña");
+      });
   }
 
   function getCookie(name) {

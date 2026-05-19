@@ -311,3 +311,23 @@ def add_review_api(request, movie_id):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+@login_required
+@require_POST
+def delete_review_api(request, review_id):
+    try:
+        review_id = int(review_id)
+        review = Review.objects.get(id=review_id)
+        
+        # Verificar que la reseña pertenece al usuario actual
+        if review.user != request.user:
+            return JsonResponse({'error': 'No tienes permiso para eliminar esta reseña'}, status=403)
+        
+        review.delete()
+        return JsonResponse({'success': True})
+        
+    except Review.DoesNotExist:
+        return JsonResponse({'error': 'Reseña no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
