@@ -39,15 +39,11 @@ def register_user(request):
                     first_name=first_name,
                     last_name=last_name
                 )
-
                 
-                profile = UserProfile.objects.create(
-                    user=user,
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=email,
-                    telefono=telefono
-                )
+                # El signal ya ha creado el perfil. Ahora, si el usuario introdujo un teléfono, lo guardamos.
+                if telefono:
+                    user.perfil.telefono = telefono
+                    user.perfil.save()
 
                 messages.success(request, "Usuario registrado correctamente")
                 return redirect('users:log_in')
@@ -119,20 +115,20 @@ def mi_perfil(request):
 @login_required
 def configuracion(request):
     # get the actual user's profile
-    perfil = request.user.perfil
+    user = request.user
     
     if request.method == 'POST':
-        form = PerfilForm(request.POST, request.FILES, instance=perfil)
+        form = PerfilForm(request.POST, request.FILES, user=user)
         if form.is_valid():
             form.save()
             messages.success(request, "Perfil actualizado correctamente")
             return redirect('users:configuracion')
     else:
-        form = PerfilForm(instance=perfil)
+        form = PerfilForm(user=user)
     
     return render(request, 'users/configuracion.html', {
         'form': form,
-        'perfil': perfil,
+        'perfil': user.perfil,
     })
 
 # ***********************************************************************************+

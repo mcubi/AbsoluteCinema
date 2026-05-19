@@ -24,7 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ps_m^eet7a+*g9p$qf-%6iu56$j$qiflt3x8v12#w2*gg_%&3s'
+from dotenv import load_dotenv
+load_dotenv()
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with DEBUG=TRUE on in production!            <-----------------------------------------------------
 DEBUG = True
@@ -165,11 +167,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ============================================
 # CONFIGURATION OF THE API (TMDb)
 
-from dotenv import load_dotenv
-
-# load variables from the .env file
-load_dotenv()
-
 # API Key of the movie database (TMDb)
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
 
@@ -203,7 +200,21 @@ LOGOUT_REDIRECT_URL = '/'
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        # Cargamos las credenciales desde el archivo .env
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET'),
+            'key': '' # Dejar vacío
+        },
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
+        'VERIFIED_EMAIL': True,
     }
 }
+
+# Para que el registro con Google sea automático y no pida confirmación
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Le decimos a allauth que use nuestro adaptador personalizado para cuentas sociales.
+SOCIALACCOUNT_ADAPTER = 'users.adapter.MySocialAccountAdapter'
