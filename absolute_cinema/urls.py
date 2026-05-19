@@ -14,7 +14,7 @@ urlpatterns = [
     path('', include('movies.urls')), # including urlpatterns from movies - app
     path('users/', include('users.urls')), # including urlpatterns from users - app
     
-    # ⬇️ RUTAS DE AUTENTICACIÓN DE GOOGLE (django-allauth) ⬇️
+    # RUTAS DE AUTENTICACIÓN DE GOOGLE (django-allauth) 
     path('accounts/', include('allauth.urls')), 
 ]
 

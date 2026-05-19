@@ -8,6 +8,7 @@ django = "*"
 python-dotenv = "*"
 requests = "*"
 pillow = "*"
+channels-redis = "*"
 
 [dev-packages]
 

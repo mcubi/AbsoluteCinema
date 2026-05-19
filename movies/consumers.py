@@ -57,6 +57,9 @@ class ReviewConsumer(AsyncWebsocketConsumer):
         # Guardar la reseña en la base de datos
         review = await self.save_review(user, self.movie_id, movie_title, rating, content, parent_id)
         
+        # Obtener la URL del avatar correctamente
+        avatar_url = await self.get_avatar_url(user)
+        
         # Enviar la nueva reseña a todos en el grupo
         review_data = {
             'id': review.id,
@@ -64,7 +67,7 @@ class ReviewConsumer(AsyncWebsocketConsumer):
             'rating': review.rating,
             'content': review.content,
             'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
-            'avatar': user.users.avatar.url if hasattr(user, 'users') and user.users.avatar else '/static/img/default-avatar.png'
+            'avatar': avatar_url
         }
         
         if parent_id:
@@ -96,6 +99,15 @@ class ReviewConsumer(AsyncWebsocketConsumer):
         }))
     
     @database_sync_to_async
+    def get_avatar_url(self, user):
+        try:
+            if hasattr(user, 'perfil') and user.perfil.avatar:
+                return user.perfil.avatar.url
+        except Exception:
+            pass
+        return None
+    
+    @database_sync_to_async
     def save_review(self, user, movie_id, movie_title, rating, content, parent_id=None):
         parent_review = None
         if parent_id:
@@ -121,17 +133,32 @@ class ReviewConsumer(AsyncWebsocketConsumer):
         
         reviews_data = []
         for review in reviews:
+            # get the url of the avatar
+            avatar_url = None
+            try:
+                if hasattr(review.user, 'perfil') and review.user.perfil.avatar:
+                    avatar_url = review.user.perfil.avatar.url
+            except Exception:
+                pass
+            
             # Get replies for this review
             replies = Review.objects.filter(parent=review).select_related('user').order_by('created_at')
             replies_data = []
             for reply in replies:
+                reply_avatar_url = None
+                try:
+                    if hasattr(reply.user, 'perfil') and reply.user.perfil.avatar:
+                        reply_avatar_url = reply.user.perfil.avatar.url
+                except Exception:
+                    pass
+                
                 replies_data.append({
                     'id': reply.id,
                     'user': reply.user.username,
                     'rating': reply.rating,
                     'content': reply.content,
                     'created_at': reply.created_at.strftime('%d/%m/%Y %H:%M'),
-                    'avatar': reply.user.users.avatar.url if hasattr(reply.user, 'users') and reply.user.users.avatar else '/static/img/default-avatar.png',
+                    'avatar': reply_avatar_url,
                     'parent_id': review.id
                 })
             
@@ -141,7 +168,7 @@ class ReviewConsumer(AsyncWebsocketConsumer):
                 'rating': review.rating,
                 'content': review.content,
                 'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
-                'avatar': review.user.users.avatar.url if hasattr(review.user, 'users') and review.user.users.avatar else '/static/img/default-avatar.png',
+                'avatar': avatar_url,
                 'replies': replies_data,
                 'reply_count': len(replies_data)
             })

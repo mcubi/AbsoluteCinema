@@ -1,19 +1,25 @@
 services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
   web:
     build: .
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
+    depends_on:
+      - redis
     env_file:
       - .env
     environment:
-      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
-      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - DJANGO_DEBUG=True   
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-me}
       - TMDB_API_KEY=${TMDB_API_KEY:-}
     volumes:
-      - media_data:/app/media
+      - ./media:/app/media
       - ./db.sqlite3:/app/db.sqlite3
     restart: unless-stopped
-
-volumes:
-  media_data:

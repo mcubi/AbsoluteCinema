@@ -106,8 +106,19 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def mi_perfil(request):
     perfil = request.user.perfil
-    return render(request, 'users/mi_perfil.html', {'perfil': perfil})
-
+    user = request.user
+    
+    # Importar el modelo de reseñas
+    from movies.models import Review
+    
+    # Obtener las reseñas del usuario
+    reseñas_usuario = Review.objects.filter(user=user).order_by('-created_at')
+    
+    return render(request, 'users/mi_perfil.html', {
+        'perfil': perfil,
+        'user': user,
+        'reseñas_usuario': reseñas_usuario,
+    })
 # ***********************************************************************************+
 
 # CONFIG PROFILE

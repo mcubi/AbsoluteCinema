@@ -39,6 +39,7 @@ ALLOWED_HOSTS = []
 # APPS DEFINITION:
 
 INSTALLED_APPS = [
+    'daphne',                       #---
     'django.contrib.admin',         # admin panel
     'django.contrib.auth',          # basic authentication
     'django.contrib.contenttypes',  # ---
@@ -100,8 +101,11 @@ WSGI_APPLICATION = 'absolute_cinema.wsgi.application'
 ASGI_APPLICATION = 'absolute_cinema.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
-    }
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)], # Apunta al contenedor 'redis' de Docker
+        },
+    },
 }
 
 
