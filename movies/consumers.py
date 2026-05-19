@@ -7,7 +7,7 @@ from .models import Review
 
 class ReviewConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.movie_id = self.scope['url_route']['kwargs']['movie_id']
+        self.movie_id = int(self.scope['url_route']['kwargs']['movie_id'])
         self.room_group_name = f'reviews_{self.movie_id}'
         
         # Unirse al grupo de la sala

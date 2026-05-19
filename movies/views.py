@@ -250,6 +250,7 @@ def detalle_actor(request, person_id):
 @require_GET
 def get_reviews_api(request, movie_id):
     try:
+        movie_id = int(movie_id)
         reviews = Review.objects.filter(movie_id=movie_id).select_related('user').order_by('-created_at')
         
         reviews_data = []
@@ -278,6 +279,7 @@ def get_reviews_api(request, movie_id):
 @require_POST
 def add_review_api(request, movie_id):
     try:
+        movie_id = int(movie_id)
         data = json.loads(request.body)
         rating = data.get('rating')
         content = data.get('content')
