@@ -581,8 +581,20 @@
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
+          // Check if it's a reply or a main review
+          const replyElement = document.querySelector(`[data-reply-id="${reviewId}"]`);
           const reviewElement = document.querySelector(`[data-review-id="${reviewId}"]`);
-          if (reviewElement) {
+
+          if (replyElement) {
+            // It's a reply - find parent review and update reply count
+            const parentContainer = replyElement.closest('[data-replies-container]');
+            if (parentContainer) {
+              const parentReviewId = parentContainer.getAttribute('data-replies-container');
+              replyElement.remove();
+              updateReplyCount(parentReviewId);
+            }
+          } else if (reviewElement) {
+            // It's a main review
             reviewElement.remove();
             updateReviewCount(document.getElementById("reviews-list").children.length);
           }
