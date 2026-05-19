@@ -251,17 +251,34 @@ def detalle_actor(request, person_id):
 def get_reviews_api(request, movie_id):
     try:
         movie_id = int(movie_id)
-        reviews = Review.objects.filter(movie_id=movie_id).select_related('user').order_by('-created_at')
+        # Get only top-level reviews (no parent)
+        reviews = Review.objects.filter(movie_id=movie_id, parent=None).select_related('user').order_by('-created_at')
         
         reviews_data = []
         for review in reviews:
+            # Get replies for this review
+            replies = Review.objects.filter(parent=review).select_related('user').order_by('created_at')
+            replies_data = []
+            for reply in replies:
+                replies_data.append({
+                    'id': reply.id,
+                    'user': reply.user.username,
+                    'rating': reply.rating,
+                    'content': reply.content,
+                    'created_at': reply.created_at.strftime('%d/%m/%Y %H:%M'),
+                    'avatar': reply.user.perfil.avatar.url if hasattr(reply.user, 'perfil') and reply.user.perfil.avatar else '/static/img/default-avatar.png',
+                    'parent_id': review.id
+                })
+            
             reviews_data.append({
                 'id': review.id,
                 'user': review.user.username,
                 'rating': review.rating,
                 'content': review.content,
                 'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
-                'avatar': review.user.perfil.avatar.url if hasattr(review.user, 'perfil') and review.user.perfil.avatar else '/static/img/default-avatar.png'
+                'avatar': review.user.perfil.avatar.url if hasattr(review.user, 'perfil') and review.user.perfil.avatar else '/static/img/default-avatar.png',
+                'replies': replies_data,
+                'reply_count': len(replies_data)
             })
         
         return JsonResponse({
@@ -284,20 +301,30 @@ def add_review_api(request, movie_id):
         rating = data.get('rating')
         content = data.get('content')
         movie_title = data.get('movie_title', '')
+        parent_id = data.get('parent_id')
         
         if not rating or not content:
             return JsonResponse({'error': 'La puntuación y el contenido son obligatorios'}, status=400)
         
-        # Crear nueva reseña
+        # If parent_id is provided, validate it exists
+        parent_review = None
+        if parent_id:
+            try:
+                parent_review = Review.objects.get(id=parent_id, movie_id=movie_id)
+            except Review.DoesNotExist:
+                return JsonResponse({'error': 'La reseña padre no existe'}, status=400)
+        
+        # Crear nueva reseña o respuesta
         review = Review.objects.create(
             user=request.user,
             movie_id=movie_id,
             movie_title=movie_title,
             rating=rating,
-            content=content
+            content=content,
+            parent=parent_review
         )
         
-        return JsonResponse({
+        response_data = {
             'success': True,
             'review': {
                 'id': review.id,
@@ -307,7 +334,12 @@ def add_review_api(request, movie_id):
                 'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
                 'avatar': review.user.perfil.avatar.url if hasattr(review.user, 'perfil') and review.user.perfil.avatar else '/static/img/default-avatar.png'
             }
-        })
+        }
+        
+        if parent_review:
+            response_data['review']['parent_id'] = parent_review.id
+        
+        return JsonResponse(response_data)
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)

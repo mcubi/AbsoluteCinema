@@ -46,6 +46,7 @@ class ReviewConsumer(AsyncWebsocketConsumer):
         rating = data.get('rating')
         content = data.get('content')
         movie_title = data.get('movie_title', '')
+        parent_id = data.get('parent_id')
         
         if not rating or not content:
             await self.send(text_data=json.dumps({
@@ -54,21 +55,26 @@ class ReviewConsumer(AsyncWebsocketConsumer):
             return
         
         # Guardar la reseña en la base de datos
-        review = await self.save_review(user, self.movie_id, movie_title, rating, content)
+        review = await self.save_review(user, self.movie_id, movie_title, rating, content, parent_id)
         
         # Enviar la nueva reseña a todos en el grupo
+        review_data = {
+            'id': review.id,
+            'user': user.username,
+            'rating': review.rating,
+            'content': review.content,
+            'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
+            'avatar': user.users.avatar.url if hasattr(user, 'users') and user.users.avatar else '/static/img/default-avatar.png'
+        }
+        
+        if parent_id:
+            review_data['parent_id'] = parent_id
+        
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'review_message',
-                'review': {
-                    'id': review.id,
-                    'user': user.username,
-                    'rating': review.rating,
-                    'content': review.content,
-                    'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
-                    'avatar': user.users.avatar.url if hasattr(user, 'users') and user.users.avatar else '/static/img/default-avatar.png'
-                }
+                'review': review_data
             }
         )
     
@@ -90,27 +96,54 @@ class ReviewConsumer(AsyncWebsocketConsumer):
         }))
     
     @database_sync_to_async
-    def save_review(self, user, movie_id, movie_title, rating, content):
+    def save_review(self, user, movie_id, movie_title, rating, content, parent_id=None):
+        parent_review = None
+        if parent_id:
+            try:
+                parent_review = Review.objects.get(id=parent_id, movie_id=movie_id)
+            except Review.DoesNotExist:
+                pass
+        
         review = Review.objects.create(
             user=user,
             movie_id=movie_id,
             movie_title=movie_title,
             rating=rating,
-            content=content
+            content=content,
+            parent=parent_review
         )
         return review
     
     @database_sync_to_async
     def load_reviews(self):
-        reviews = Review.objects.filter(movie_id=self.movie_id).select_related('user')
-        return [
-            {
+        # Get only top-level reviews (no parent)
+        reviews = Review.objects.filter(movie_id=self.movie_id, parent=None).select_related('user')
+        
+        reviews_data = []
+        for review in reviews:
+            # Get replies for this review
+            replies = Review.objects.filter(parent=review).select_related('user').order_by('created_at')
+            replies_data = []
+            for reply in replies:
+                replies_data.append({
+                    'id': reply.id,
+                    'user': reply.user.username,
+                    'rating': reply.rating,
+                    'content': reply.content,
+                    'created_at': reply.created_at.strftime('%d/%m/%Y %H:%M'),
+                    'avatar': reply.user.users.avatar.url if hasattr(reply.user, 'users') and reply.user.users.avatar else '/static/img/default-avatar.png',
+                    'parent_id': review.id
+                })
+            
+            reviews_data.append({
                 'id': review.id,
                 'user': review.user.username,
                 'rating': review.rating,
                 'content': review.content,
                 'created_at': review.created_at.strftime('%d/%m/%Y %H:%M'),
-                'avatar': review.user.users.avatar.url if hasattr(review.user, 'users') and review.user.users.avatar else '/static/img/default-avatar.png'
-            }
-            for review in reviews
-        ]
+                'avatar': review.user.users.avatar.url if hasattr(review.user, 'users') and review.user.users.avatar else '/static/img/default-avatar.png',
+                'replies': replies_data,
+                'reply_count': len(replies_data)
+            })
+        
+        return reviews_data
