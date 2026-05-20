@@ -97,7 +97,7 @@
                
             <div class="w-full h-36 rounded-lg bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300">
               {% if pelicula.poster_url %}
-                <img src="{{ pelicula.poster_url }}" alt="{{ pelicula.title }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <img src="{{ pelicula.poster_url }}" loading="lazy" alt="{{ pelicula.title }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
               {% else %}
                 <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-600 p-2">
                   <i class="fas fa-film text-2xl mb-1"></i>

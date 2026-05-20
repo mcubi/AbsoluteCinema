@@ -108,6 +108,14 @@ CHANNEL_LAYERS = {
     },
 }
 
+# CACHÉ CON REDIS
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379/1", # Usamos la base de datos 1 para no pisar a los WebSockets (que usan la 0)
+    }
+}
+
 
 
 # DATABASE:

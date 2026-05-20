@@ -39,7 +39,7 @@
           <div class="flex items-center justify-center flex-wrap gap-3">
             {% if pelicula.providers %} 
               {% for provider in pelicula.providers %}
-              <img src="{{ provider.logo_url }}" alt="{{ provider.name }}" title="{{ provider.name }}" class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-gray-200 dark:border-white/10 hover:scale-110 transition cursor-help" />
+              <img src="{{ provider.logo_url }}" loading="lazy" alt="{{ provider.name }}" title="{{ provider.name }}" class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-gray-200 dark:border-white/10 hover:scale-110 transition cursor-help" />
               {% endfor %} 
             {% else %}
               <span class="text-gray-500 dark:text-gray-400 text-xs italic">No disponible en streaming</span>
@@ -126,7 +126,7 @@
         <div class="text-center min-w-[100px] group cursor-pointer" onclick="window.location.href='/actor/{{ actor.id }}/'">
           <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/10 mx-auto overflow-hidden mb-2 group-hover:border-ac-primary transition duration-300">
             {% if actor.profile_path %}
-            <img src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}" alt="{{ actor.name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+            <img src="https://image.tmdb.org/t/p/w185{{ actor.profile_path }}" loading="lazy" alt="{{ actor.name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
             {% else %}
             <div class="w-full h-full flex items-center justify-center text-3xl bg-gray-200 dark:bg-gray-800">
               <i class="fas fa-user text-gray-500 dark:text-gray-500"></i>
