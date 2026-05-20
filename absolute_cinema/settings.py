@@ -225,3 +225,26 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 # Le decimos a allauth que use nuestro adaptador personalizado para cuentas sociales.
 SOCIALACCOUNT_ADAPTER = 'users.adapter.MySocialAccountAdapter'
+
+
+# E-MAIL CONFIGURATION (ft. password recuperation)
+
+# test_phase (eliminate in production case, replace with @real config commented below)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# real config:
+# EMAIL_HOST = #SMTP server
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your_correo@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your password'
+
+# codification:
+DEFAULT_CHARSET = 'utf-8'
+FILE_CHARSET = 'utf-8'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# language (spanish)
+LANGUAGE_CODE = 'es-es'
+USE_I18N = True
+USE_L10N = True

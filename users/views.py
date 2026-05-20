@@ -11,6 +11,15 @@ import os
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from .forms import LoginForm
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 # ***********************************************************************************+
                                         # VIEWS
@@ -209,3 +218,86 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     
     return render(request, 'users/change_password.html', {'form': form})
+
+# **************************************************************************************************+
+
+# FORGOT PASSWORD RECUPERATION
+
+def password_reset_request(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            
+            # Generar token y UID
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Crear enlace de restablecimiento
+            reset_url = request.build_absolute_uri(
+                reverse('users:password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            
+            # Preparar el correo (usando texto plano para evitar problemas)
+            subject = "Restablecer contrasena - Absolute Cinema"
+            
+            # Mensaje en texto plano (más seguro para pruebas)
+            plain_message = f"""
+Hola {user.username},
+
+Haz clic en el siguiente enlace para restablecer tu contrasena:
+
+{reset_url}
+
+Este enlace expirara en 24 horas.
+
+Si no solicitaste este cambio, ignora este mensaje.
+
+--
+Absolute Cinema
+            """
+            
+            # Send email (if EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend', the message will be displayed at the console!!!!)
+            send_mail(
+                subject=subject,
+                message=plain_message,
+                from_email=None,  # Will use DEFAULT_FROM_EMAIL if it's configured
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            
+            
+            return redirect('users:password_reset_done')
+            
+        except User.DoesNotExist:
+            messages.error(request, 'No existe una cuenta con este correo electronico.')
+            return redirect('users:password_reset_request')
+    
+    return render(request, 'users/forgot_password.html')
+
+
+def password_reset_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form = SetPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Tu contrasena ha sido restablecida exitosamente.')
+                return redirect('users:log_in')
+            else:
+                for error in form.errors.values():
+                    messages.error(request, error)
+        return render(request, 'users/reset_password.html', {'uidb64': uidb64, 'token': token})
+    else:
+        messages.error(request, 'El enlace de recuperacion es invalido o ha expirado.')
+        return redirect('users:password_reset_request')
+
+
+def password_reset_done(request):
+    return render(request, 'users/password_reset_sent.html')

@@ -11,5 +11,8 @@ urlpatterns = [
     path('configuracion/', views.configuracion, name='configuracion'),
     path('delete_account/', views.delete_account, name='delete_account'),
     path('change_password/', views.change_password, name='change_password'),
+    path('reset-password/done/', views.password_reset_done, name='password_reset_done'),
+    path('reset-password/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
+    path('forgot-password/', views.password_reset_request, name='password_reset_request'),
     path('', include('movies.urls')),
 ]
