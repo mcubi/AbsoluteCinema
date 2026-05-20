@@ -1,8 +1,8 @@
 # IMPORTS
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .models import UserProfile # noqa
+from .models import UserProfile, Follow  # AÑADIDO Follow
 from .forms import RegistroForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -142,10 +142,119 @@ def mi_perfil(request):
         'reseñas_usuario': reseñas_usuario,
         'peliculas_recomendadas': peliculas_recomendadas,
     })
+
+# ***********************************************************************************+
+
+# PERFIL PÚBLICO DE OTROS USUARIOS
+
+def perfil_publico(request, username):
+    """Ver el perfil público de otro usuario"""
+    profile_user = get_object_or_404(User, username=username)
+    perfil = profile_user.perfil
+    
+    # Obtener las reseñas del usuario
+    reseñas_usuario = Review.objects.filter(user=profile_user).order_by('-created_at')
+    
+    # URL del poster de las reseñas
+    for review in reseñas_usuario:
+        try:
+            movie_details = get_movie_details(review.movie_id)
+            if movie_details and movie_details.get('poster_path'):
+                review.movie_poster = f"https://image.tmdb.org/t/p/w200{movie_details['poster_path']}"
+            else:
+                review.movie_poster = None
+        except:
+            review.movie_poster = None
+    
+    # Verificar si el usuario actual sigue a este perfil
+    is_following = False
+    followers_count = profile_user.followers.count()
+    following_count = profile_user.following.count()
+    
+    if request.user.is_authenticated and request.user != profile_user:
+        is_following = Follow.objects.filter(follower=request.user, followed=profile_user).exists()
+    
+    return render(request, 'users/perfil_publico.html', {
+        'profile_user': profile_user,
+        'perfil': perfil,
+        'reseñas_usuario': reseñas_usuario,
+        'is_following': is_following,
+        'followers_count': followers_count,
+        'following_count': following_count,
+    })
+
+# ***********************************************************************************+
+
+# SEGUIR USUARIO
+
+@login_required
+def follow_user(request, user_id):
+    """Seguir a un usuario"""
+    user_to_follow = get_object_or_404(User, id=user_id)
+    
+    # No puedes seguirte a ti mismo
+    if request.user == user_to_follow:
+        messages.error(request, "No puedes seguirte a ti mismo.")
+        return redirect('users:perfil_publico', username=user_to_follow.username)
+    
+    # Crear el follow si no existe
+    follow, created = Follow.objects.get_or_create(
+        follower=request.user,
+        followed=user_to_follow
+    )
+    
+    if created:
+        messages.success(request, f"Ahora sigues a {user_to_follow.username}")
+    else:
+        messages.info(request, f"Ya sigues a {user_to_follow.username}")
+    
+    return redirect('users:perfil_publico', username=user_to_follow.username)
+
+# ***********************************************************************************+
+
+# DEJAR DE SEGUIR USUARIO
+
+@login_required
+def unfollow_user(request, user_id):
+    """Dejar de seguir a un usuario"""
+    user_to_unfollow = get_object_or_404(User, id=user_id)
+    
+    Follow.objects.filter(follower=request.user, followed=user_to_unfollow).delete()
+    
+    messages.success(request, f"Has dejado de seguir a {user_to_unfollow.username}")
+    return redirect('users:perfil_publico', username=user_to_unfollow.username)
+
+# ***********************************************************************************+
+
+# MIS SEGUIDORES
+
+@login_required
+def mis_seguidores(request, username):
+    """Ver lista de personas que siguen a un usuario específico"""
+    profile_user = get_object_or_404(User, username=username)
+    seguidores = profile_user.followers.all()
+    return render(request, 'users/seguidores.html', {
+        'seguidores': seguidores,
+        'profile_user': profile_user,
+    })
+
+# ***********************************************************************************+
+
+# MIS SIGUIENDO
+
+@login_required
+def mis_siguiendo(request, username):
+    """Ver lista de personas que sigue un usuario específico"""
+    profile_user = get_object_or_404(User, username=username)
+    siguiendo = profile_user.following.all()
+    return render(request, 'users/siguiendo.html', {
+        'siguiendo': siguiendo,
+        'profile_user': profile_user,
+    })
+
 # ***********************************************************************************+
 
 # CONFIG PROFILE
-
 
 @login_required
 def configuracion(request):

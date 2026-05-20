@@ -73,28 +73,12 @@
               <i class="fas fa-shield-alt w-5"></i>
               <span>Privacidad</span>
             </button>
-            <button
-              onclick="showSection('notificaciones')"
-              id="btn-notificaciones"
-              class="menu-btn w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10"
-            >
-              <i class="fas fa-bell w-5"></i>
-              <span>Notificaciones</span>
-            </button>
           </nav>
         </div>
       </div>
 
       <!--right content-->
       <div class="flex-1">
-        <!--success/error messages-->
-        {% if messages %} {% for message in messages %}
-        <div
-          class="bg-ac-primary/20 border border-ac-primary text-gray-900 dark:text-white px-4 py-3 rounded-lg mb-6 text-center"
-        >
-          {{ message }}
-        </div>
-        {% endfor %} {% endif %}
 
         <!--general option-->
         <div id="section-general" class="section-content">
@@ -316,51 +300,6 @@
           </div>
         </div>
 
-        <!--notification option (borrar si eso)-->
-        <div id="section-notificaciones" class="section-content hidden">
-          <div class="mb-6">
-            <h1
-              class="text-2xl md:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white"
-            >
-              Notificaciones
-            </h1>
-            <p class="text-sm mt-1 text-gray-500 dark:text-gray-400">
-              Configura tus preferencias de notificaciones
-            </p>
-          </div>
-
-          <div
-            class="bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden opacity-60"
-          >
-            <div class="p-5">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-800"
-                  >
-                    <i
-                      class="fas fa-bell text-sm text-gray-500 dark:text-gray-400"
-                    ></i>
-                  </div>
-                  <div>
-                    <div
-                      class="font-medium text-sm text-gray-900 dark:text-white"
-                    >
-                      Correos electrónicos
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      Recibe novedades y recomendaciones
-                    </div>
-                  </div>
-                </div>
-                <span
-                  class="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-                  >Próximamente</span
-                >
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>

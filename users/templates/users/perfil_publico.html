@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{{ profile_user.first_name }} {{ profile_user.last_name }} - Absolute Cinema
+{% endblock %}
+
+{% block content %}
+
+<div class="bg-gray-50 dark:bg-ac-bg min-h-screen">
+  <div class="container mx-auto px-6 py-8 pt-24">
+    
+    <div class="max-w-5xl mx-auto">
+      
+      <!--user profile-->
+      <div class="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 overflow-hidden mb-6">
+        
+        <div class="relative px-8 pt-8 pb-6">
+          <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+
+            <!--avatar-->
+            <div class="relative">
+              <div class="w-28 h-28 rounded-full bg-gradient-to-br from-ac-primary to-purple-600 p-0.5">
+                <div class="w-full h-full rounded-full bg-white dark:bg-gray-900 overflow-hidden">
+                  {% if perfil.avatar and perfil.avatar.url %}
+                    <img src="{{ perfil.avatar.url }}" alt="{{ perfil.first_name }}" class="w-full h-full object-cover">
+                  {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                      <i class="fas fa-user text-4xl text-gray-400 dark:text-gray-500"></i>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <!--user info-->
+            <div class="flex-1 text-center md:text-left">
+              <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-1">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                  {{ profile_user.first_name }} {{ profile_user.last_name }}
+                </h2>
+                <span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-full">
+                  <i class="fas fa-check-circle text-xs"></i> Activo
+                </span>
+              </div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">
+                @{{ profile_user.username }}
+              </p>
+              <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <span><i class="far fa-calendar-alt mr-1"></i> Desde {{ profile_user.date_joined|date:"M Y" }}</span>
+                <span><i class="fas fa-star mr-1 text-ac-primary"></i> {{ reseñas_usuario|length }} reseñas</span>
+                <span><i class="fas fa-film mr-1"></i> 0 películas vistas</span>
+              </div>
+            </div>
+            
+            <!--follow button / edit profile (only if is the same user)-->
+            <div>
+              {% if request.user == profile_user %}
+                <a href="{% url 'users:configuracion' %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                  <i class="fas fa-pen"></i> Editar perfil
+                </a>
+              {% else %}
+                {% if is_following %}
+                  <form action="{% url 'users:unfollow' profile_user.id %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition border border-red-200 dark:border-red-800">
+                      <i class="fas fa-user-minus"></i> Dejar de seguir
+                    </button>
+                  </form>
+                {% else %}
+                  <form action="{% url 'users:follow' profile_user.id %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-ac-primary rounded-lg hover:bg-ac-primary-dark transition shadow-md">
+                      <i class="fas fa-user-plus"></i> Seguir
+                    </button>
+                  </form>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <!--info with followers and following-->
+        <div class="grid grid-cols-4 gap-4 px-8 py-4 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-black/20">
+          <div class="text-center">
+            <div class="text-lg font-bold text-ac-primary">{{ reseñas_usuario|length }}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Reseñas</div>
+          </div>
+          <div class="text-center">
+            <div class="text-lg font-bold text-gray-700 dark:text-gray-300">0</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Películas vistas</div>
+          </div>
+            <div class="text-center">
+                <a href="{% url 'users:seguidores' profile_user.username %}" class="block hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition -m-2 p-2">
+                    <div class="text-lg font-bold text-gray-700 dark:text-gray-300">{{ followers_count }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Seguidores</div>
+                </a>
+            </div>
+            <div class="text-center">
+                <a href="{% url 'users:siguiendo' profile_user.username %}" class="block hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition -m-2 p-2">
+                    <div class="text-lg font-bold text-gray-700 dark:text-gray-300">{{ following_count }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Siguiendo</div>
+                </a>
+            </div>
+        </div>
+      </div>
+
+      <!--reviews section-->
+      <div class="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 overflow-hidden">
+        
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              <i class="fas fa-star text-ac-primary mr-2"></i> Reseñas de {{ profile_user.first_name }}
+            </h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Películas que ha valorado y comentado</p>
+          </div>
+        </div>
+
+        <div class="divide-y divide-gray-100 dark:divide-white/5">
+          {% if reseñas_usuario %}
+            {% for review in reseñas_usuario %}
+            <div class="p-5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition group">
+              <div class="flex gap-4">
+                <a href="/pelicula/{{ review.movie_id }}/" class="flex-shrink-0">
+                  {% if review.movie_poster %}
+                    <img src="{{ review.movie_poster }}" alt="{{ review.movie_title }}" class="w-16 h-24 rounded-lg object-cover shadow-sm">
+                  {% else %}
+                    <div class="w-16 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <i class="fas fa-film text-2xl text-gray-400"></i>
+                    </div>
+                  {% endif %}
+                </a>
+                
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div class="flex-1">
+                      <a href="/pelicula/{{ review.movie_id }}/" class="text-base font-semibold text-gray-900 dark:text-white hover:text-ac-primary transition">
+                        {{ review.movie_title }}
+                      </a>
+                      <div class="flex items-center gap-2 mt-1">
+                        <div class="flex items-center gap-0.5">
+                          {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= review.rating %}
+                              <i class="fas fa-star text-yellow-500 text-xs"></i>
+                            {% else %}
+                              <i class="far fa-star text-gray-300 dark:text-gray-600 text-xs"></i>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                        <span class="text-xs text-gray-500">({{ review.rating }}/5)</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                      <span class="text-xs text-gray-400">{{ review.created_at|date:"d/m/Y" }}</span>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                    {{ review.content }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="py-16 text-center">
+              <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-star text-3xl text-gray-400"></i>
+              </div>
+              <p class="text-gray-500 dark:text-gray-400 font-medium">{{ profile_user.first_name }} no ha escrito ninguna reseña todavía</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+{% endblock %}
