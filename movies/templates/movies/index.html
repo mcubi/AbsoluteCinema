@@ -54,7 +54,7 @@ Inicio - Reseñas de Películas
         <a href="/pelicula/{{ hero_movie.id }}/" class="bg-ac-primary hover:bg-ac-primary-dark text-white px-6 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2">
           <i class="fas fa-star"></i> Ver reseñas
         </a>
-        <a href="/review/nueva/{{ hero_movie.id }}/" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2">
+        <a href="/pelicula/{{ hero_movie.id }}/#reviews" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2">
           <i class="fas fa-pen"></i> Puntuar
         </a>
       </div>
@@ -112,8 +112,7 @@ Inicio - Reseñas de Películas
                   <span class="text-gray-500 dark:text-gray-500 text-xs">({{ movie.vote_count|default:"856" }})</span>
                 </div>
 
-                <!--buttons-->
-                <a href="/review/nueva/{{ movie.id }}/" class="text-gray-500 dark:text-gray-400 hover:text-ac-primary text-sm transition" onclick="event.stopPropagation()">
+                <a href="/pelicula/{{ movie.id }}/#reviews" class="text-gray-500 dark:text-gray-400 hover:text-ac-primary text-sm transition" onclick="event.stopPropagation()">
                   <i class="fas fa-star"></i> Puntuar
                 </a>
                 

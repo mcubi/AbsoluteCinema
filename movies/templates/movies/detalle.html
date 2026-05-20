@@ -90,7 +90,7 @@
           <a href="#reviews" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-bold uppercase tracking-wider">Reseñas</a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
             <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">NOTA TMDB</div>
             <div class="flex items-center justify-center gap-2">
@@ -98,14 +98,6 @@
               <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ pelicula.vote_average|floatformat:1|default:"0.0" }}</span>
             </div>
             <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ pelicula.vote_count }} votos</div>
-          </div>
-
-          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
-            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">TU PUNTUACIÓN</div>
-            <a href="#" class="flex flex-col items-center justify-center gap-1 group cursor-pointer">
-              <i class="far fa-star text-2xl text-gray-500 dark:text-gray-500 group-hover:text-ac-primary transition transform group-hover:scale-110"></i>
-              <span class="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:roup-hover:text-white text-xs transition">Haz clic para puntuar</span>
-            </a>
           </div>
 
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
