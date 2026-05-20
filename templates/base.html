@@ -446,6 +446,26 @@
       });
     </script>
 
+    <script>
+    (function() {
+        let isRefreshing = false;
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted && !isRefreshing) {
+                isRefreshing = true;
+                window.location.reload();
+            }
+        });
+        let lastUrl = window.location.href;
+        window.addEventListener('popstate', function() {
+            if (!isRefreshing && window.location.href === lastUrl) {
+                isRefreshing = true;
+                window.location.reload();
+            }
+            lastUrl = window.location.href;
+        });
+    })();
+    </script>
+
     {% block extra_js %}{% endblock %}
   </body>
 </html>

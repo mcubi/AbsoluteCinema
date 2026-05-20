@@ -19,23 +19,23 @@ Mi Perfil - Absolute Cinema
           <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
 
             <!--avatar-->
-      <div class="relative">
-        <div class="w-28 h-28 rounded-full bg-gradient-to-br from-ac-primary to-purple-600 p-0.5">
-          <div class="w-full h-full rounded-full bg-white dark:bg-gray-900 overflow-hidden">
-            {% if perfil.avatar and perfil.avatar.url %}
-              <img src="{{ perfil.avatar.url }}" alt="{{ perfil.first_name }}" class="w-full h-full object-cover">
-            {% else %}
-              <div class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                <i class="fas fa-user text-4xl text-gray-400 dark:text-gray-500"></i>
+            <div class="relative">
+              <div class="w-28 h-28 rounded-full bg-gradient-to-br from-ac-primary to-purple-600 p-0.5">
+                <div class="w-full h-full rounded-full bg-white dark:bg-gray-900 overflow-hidden">
+                  {% if perfil.avatar and perfil.avatar.url %}
+                    <img src="{{ perfil.avatar.url }}" alt="{{ perfil.first_name }}" class="w-full h-full object-cover">
+                  {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                      <i class="fas fa-user text-4xl text-gray-400 dark:text-gray-500"></i>
+                    </div>
+                  {% endif %}
+                </div>
               </div>
-            {% endif %}
-          </div>
-        </div>
-        <a href="{% url 'users:configuracion' %}" 
-          class="absolute bottom-1 right-1 bg-ac-primary text-white w-7 h-7 rounded-full text-xs shadow-md hover:bg-ac-primary-dark transition flex items-center justify-center">
-          <i class="fas fa-camera"></i>
-        </a>
-      </div>
+              <a href="{% url 'users:configuracion' %}" 
+                class="absolute bottom-1 right-1 bg-ac-primary text-white w-7 h-7 rounded-full text-xs shadow-md hover:bg-ac-primary-dark transition flex items-center justify-center">
+                <i class="fas fa-camera"></i>
+              </a>
+            </div>
             
             <!--user info-->
             <div class="flex-1 text-center md:text-left">
@@ -102,68 +102,143 @@ Mi Perfil - Absolute Cinema
         </div>
 
         <!--review list-->
-        <div class="divide-y divide-gray-100 dark:divide-white/5">
+        <div class="divide-y divide-gray-100 dark:divide-white/5" id="reviews-container">
           {% if reseñas_usuario %}
-            {% for review in reseñas_usuario %}
-            <div class="p-5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition group">
-              <div class="flex gap-4">
-                <!--poster-->
-                <a href="/pelicula/{{ review.movie_id }}/" class="flex-shrink-0">
-                  {% if review.movie_poster %}
-                    <img src="{{ review.movie_poster }}" alt="{{ review.movie_title }}" class="w-16 h-24 rounded-lg object-cover shadow-sm">
-                  {% else %}
-                    <div class="w-16 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <i class="fas fa-film text-2xl text-gray-400"></i>
-                    </div>
-                  {% endif %}
-                </a>
-                
-                <!--review content-->
-                <div class="flex-1 min-w-0">
-                  <div class="flex flex-wrap items-start justify-between gap-2">
-                    <div class="flex-1">
-                      <a href="/pelicula/{{ review.movie_id }}/" class="text-base font-semibold text-gray-900 dark:text-white hover:text-ac-primary transition">
-                        {{ review.movie_title }}
-                      </a>
-                      <div class="flex items-center gap-2 mt-1">
-                        <div class="flex items-center gap-0.5">
-                          {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= review.rating %}
-                              <i class="fas fa-star text-yellow-500 text-xs"></i>
-                            {% else %}
-                              <i class="far fa-star text-gray-300 dark:text-gray-600 text-xs"></i>
-                            {% endif %}
-                          {% endfor %}
+            {% with total_reviews=reseñas_usuario|length %}
+              {% for review in reseñas_usuario|slice:":3" %}
+              <div class="review-item p-5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition group" data-review-id="{{ review.id }}">
+                <div class="flex gap-4">
+                  <!--poster-->
+                  <a href="/pelicula/{{ review.movie_id }}/" class="flex-shrink-0">
+                    {% if review.movie_poster %}
+                      <img src="{{ review.movie_poster }}" alt="{{ review.movie_title }}" class="w-16 h-24 rounded-lg object-cover shadow-sm">
+                    {% else %}
+                      <div class="w-16 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <i class="fas fa-film text-2xl text-gray-400"></i>
+                      </div>
+                    {% endif %}
+                  </a>
+                  
+                  <!--review content-->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                      <div class="flex-1">
+                        <a href="/pelicula/{{ review.movie_id }}/" class="text-base font-semibold text-gray-900 dark:text-white hover:text-ac-primary transition">
+                          {{ review.movie_title }}
+                        </a>
+                        <div class="flex items-center gap-2 mt-1">
+                          <div class="flex items-center gap-0.5">
+                            {% for i in "12345"|make_list %}
+                              {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star text-yellow-500 text-xs"></i>
+                              {% else %}
+                                <i class="far fa-star text-gray-300 dark:text-gray-600 text-xs"></i>
+                              {% endif %}
+                            {% endfor %}
+                          </div>
+                          <span class="text-xs text-gray-500">({{ review.rating }}/5)</span>
                         </div>
-                        <span class="text-xs text-gray-500">({{ review.rating }}/5)</span>
+                      </div>
+                      <div class="flex items-center gap-3 flex-shrink-0">
+                        <span class="text-xs text-gray-400">{{ review.created_at|date:"d/m/Y" }}</span>
+                        <button onclick="deleteReview('{{ review.id }}')" class="text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
                       </div>
                     </div>
-                    <div class="flex items-center gap-3 flex-shrink-0">
-                      <span class="text-xs text-gray-400">{{ review.created_at|date:"d/m/Y" }}</span>
-                      <button onclick="deleteReview('{{ review.id }}')" class="text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100">
-                        <i class="fas fa-trash-alt"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-                    {{ review.content }}
-                  </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                      {{ review.content }}
+                    </p>
 
-                  <!--aditional-->
-                  <div class="flex flex-wrap gap-3 mt-2">
-                    <span class="text-xs text-gray-400">
-                      <i class="far fa-clock mr-1"></i> Hace {{ review.created_at|timesince }}
-                    </span>
-                    <span class="text-xs text-gray-400">
-                      <i class="fas fa-reply-all mr-1"></i> 0 respuestas
-                    </span>
+                    <!--aditional-->
+                    <div class="flex flex-wrap gap-3 mt-2">
+                      <span class="text-xs text-gray-400">
+                        <i class="far fa-clock mr-1"></i> Hace {{ review.created_at|timesince }}
+                      </span>
+                      <span class="text-xs text-gray-400">
+                        <i class="fas fa-reply-all mr-1"></i> 0 respuestas
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            {% endfor %}
+              {% endfor %}
+              
+              <!--hide reviews-->
+              {% if total_reviews > 3 %}
+              <div id="more-reviews" class="hidden">
+                {% for review in reseñas_usuario|slice:"3:" %}
+                <div class="review-item p-5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition group" data-review-id="{{ review.id }}">
+                  <div class="flex gap-4">
+                    <!--poster-->
+                    <a href="/pelicula/{{ review.movie_id }}/" class="flex-shrink-0">
+                      {% if review.movie_poster %}
+                        <img src="{{ review.movie_poster }}" alt="{{ review.movie_title }}" class="w-16 h-24 rounded-lg object-cover shadow-sm">
+                      {% else %}
+                        <div class="w-16 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                          <i class="fas fa-film text-2xl text-gray-400"></i>
+                        </div>
+                      {% endif %}
+                    </a>
+                    
+                    <!--review content-->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex flex-wrap items-start justify-between gap-2">
+                        <div class="flex-1">
+                          <a href="/pelicula/{{ review.movie_id }}/" class="text-base font-semibold text-gray-900 dark:text-white hover:text-ac-primary transition">
+                            {{ review.movie_title }}
+                          </a>
+                          <div class="flex items-center gap-2 mt-1">
+                            <div class="flex items-center gap-0.5">
+                              {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= review.rating %}
+                                  <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                {% else %}
+                                  <i class="far fa-star text-gray-300 dark:text-gray-600 text-xs"></i>
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                            <span class="text-xs text-gray-500">({{ review.rating }}/5)</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                          <span class="text-xs text-gray-400">{{ review.created_at|date:"d/m/Y" }}</span>
+                          <button onclick="deleteReview('{{ review.id }}')" class="text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                        {{ review.content }}
+                      </p>
+
+                      <!--aditional-->
+                      <div class="flex flex-wrap gap-3 mt-2">
+                        <span class="text-xs text-gray-400">
+                          <i class="far fa-clock mr-1"></i> Hace {{ review.created_at|timesince }}
+                        </span>
+                        <span class="text-xs text-gray-400">
+                          <i class="fas fa-reply-all mr-1"></i> 0 respuestas
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              
+              <!--button more or less review-->
+              <div class="px-6 py-4 border-t border-gray-100 dark:border-white/10 text-center">
+                <button id="show-more-btn" class="text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 px-5 py-2 rounded-lg transition inline-flex items-center gap-2">
+                  <i class="fas fa-chevron-down text-xs"></i> Ver más reseñas ({{ total_reviews|add:"-3" }} restantes)
+                </button>
+                <button id="show-less-btn" class="text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 px-5 py-2 rounded-lg transition inline-flex items-center gap-2 hidden">
+                  <i class="fas fa-chevron-up text-xs"></i> Ver menos
+                </button>
+              </div>
+              {% endif %}
+            {% endwith %}
           {% else %}
-            
             <div class="py-16 text-center">
               <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-star text-3xl text-gray-400"></i>
@@ -176,13 +251,6 @@ Mi Perfil - Absolute Cinema
             </div>
           {% endif %}
         </div>
-        
-        <!--if there are review-->
-        {% if reseñas_usuario %}
-        <div class="px-6 py-3 border-t border-gray-100 dark:border-white/10 text-center">
-          <a href="#" class="text-sm text-gray-500 hover:text-ac-primary transition">Ver todas mis reseñas →</a>
-        </div>
-        {% endif %}
       </div>
       
       <!--movies for you-->
@@ -228,46 +296,5 @@ Mi Perfil - Absolute Cinema
 {% endblock %}
 
 {% block extra_js %}
-<script>
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-  function deleteReview(reviewId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta reseña? Esta acción no se puede deshacer.')) {
-      return;
-    }
-
-    fetch(`/api/reviews/delete/${reviewId}/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken'),
-      },
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        location.reload();
-      } else {
-        alert(data.error || 'Error al eliminar la reseña');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error al eliminar la reseña');
-    });
-  }
-</script>
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
