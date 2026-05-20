@@ -117,51 +117,112 @@
           </div>
         </div>
 
-        <div class="divide-y divide-gray-100 dark:divide-white/5">
+        <div class="divide-y divide-gray-100 dark:divide-white/5" id="reviews-container">
           {% if reseñas_usuario %}
-            {% for review in reseñas_usuario %}
-            <div class="p-5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition group">
-              <div class="flex gap-4">
-                <a href="/pelicula/{{ review.movie_id }}/" class="flex-shrink-0">
-                  {% if review.movie_poster %}
-                    <img src="{{ review.movie_poster }}" alt="{{ review.movie_title }}" class="w-16 h-24 rounded-lg object-cover shadow-sm">
-                  {% else %}
-                    <div class="w-16 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <i class="fas fa-film text-2xl text-gray-400"></i>
-                    </div>
-                  {% endif %}
-                </a>
-                
-                <div class="flex-1 min-w-0">
-                  <div class="flex flex-wrap items-start justify-between gap-2">
-                    <div class="flex-1">
-                      <a href="/pelicula/{{ review.movie_id }}/" class="text-base font-semibold text-gray-900 dark:text-white hover:text-ac-primary transition">
-                        {{ review.movie_title }}
-                      </a>
-                      <div class="flex items-center gap-2 mt-1">
-                        <div class="flex items-center gap-0.5">
-                          {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= review.rating %}
-                              <i class="fas fa-star text-yellow-500 text-xs"></i>
-                            {% else %}
-                              <i class="far fa-star text-gray-300 dark:text-gray-600 text-xs"></i>
-                            {% endif %}
-                          {% endfor %}
+            {% with total_reviews=reseñas_usuario|length %}
+              {% for review in reseñas_usuario|slice:":3" %}
+              <div class="review-item p-5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition group" data-review-id="{{ review.id }}">
+                <div class="flex gap-4">
+                  <a href="/pelicula/{{ review.movie_id }}/" class="flex-shrink-0">
+                    {% if review.movie_poster %}
+                      <img src="{{ review.movie_poster }}" alt="{{ review.movie_title }}" class="w-16 h-24 rounded-lg object-cover shadow-sm">
+                    {% else %}
+                      <div class="w-16 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <i class="fas fa-film text-2xl text-gray-400"></i>
+                      </div>
+                    {% endif %}
+                  </a>
+                  
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                      <div class="flex-1">
+                        <a href="/pelicula/{{ review.movie_id }}/" class="text-base font-semibold text-gray-900 dark:text-white hover:text-ac-primary transition">
+                          {{ review.movie_title }}
+                        </a>
+                        <div class="flex items-center gap-2 mt-1">
+                          <div class="flex items-center gap-0.5">
+                            {% for i in "12345"|make_list %}
+                              {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star text-yellow-500 text-xs"></i>
+                              {% else %}
+                                <i class="far fa-star text-gray-300 dark:text-gray-600 text-xs"></i>
+                              {% endif %}
+                            {% endfor %}
+                          </div>
+                          <span class="text-xs text-gray-500">({{ review.rating }}/5)</span>
                         </div>
-                        <span class="text-xs text-gray-500">({{ review.rating }}/5)</span>
+                      </div>
+                      <div class="flex items-center gap-3 flex-shrink-0">
+                        <span class="text-xs text-gray-400">{{ review.created_at|date:"d/m/Y" }}</span>
                       </div>
                     </div>
-                    <div class="flex items-center gap-3 flex-shrink-0">
-                      <span class="text-xs text-gray-400">{{ review.created_at|date:"d/m/Y" }}</span>
-                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                      {{ review.content }}
+                    </p>
                   </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-                    {{ review.content }}
-                  </p>
                 </div>
               </div>
-            </div>
-            {% endfor %}
+              {% endfor %}
+              
+              <!--hide reviews-->
+              {% if total_reviews > 3 %}
+              <div id="more-reviews" class="hidden">
+                {% for review in reseñas_usuario|slice:"3:" %}
+                <div class="review-item p-5 hover:bg-gray-50/50 dark:hover:bg-white/5 transition group" data-review-id="{{ review.id }}">
+                  <div class="flex gap-4">
+                    <a href="/pelicula/{{ review.movie_id }}/" class="flex-shrink-0">
+                      {% if review.movie_poster %}
+                        <img src="{{ review.movie_poster }}" alt="{{ review.movie_title }}" class="w-16 h-24 rounded-lg object-cover shadow-sm">
+                      {% else %}
+                        <div class="w-16 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                          <i class="fas fa-film text-2xl text-gray-400"></i>
+                        </div>
+                      {% endif %}
+                    </a>
+                    
+                    <div class="flex-1 min-w-0">
+                      <div class="flex flex-wrap items-start justify-between gap-2">
+                        <div class="flex-1">
+                          <a href="/pelicula/{{ review.movie_id }}/" class="text-base font-semibold text-gray-900 dark:text-white hover:text-ac-primary transition">
+                            {{ review.movie_title }}
+                          </a>
+                          <div class="flex items-center gap-2 mt-1">
+                            <div class="flex items-center gap-0.5">
+                              {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= review.rating %}
+                                  <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                {% else %}
+                                  <i class="far fa-star text-gray-300 dark:text-gray-600 text-xs"></i>
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                            <span class="text-xs text-gray-500">({{ review.rating }}/5)</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                          <span class="text-xs text-gray-400">{{ review.created_at|date:"d/m/Y" }}</span>
+                        </div>
+                      </div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                        {{ review.content }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              
+              <!--button more or less review-->
+              <div class="px-6 py-4 border-t border-gray-100 dark:border-white/10 text-center">
+                <button id="show-more-btn" class="text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 px-5 py-2 rounded-lg transition inline-flex items-center gap-2">
+                  <i class="fas fa-chevron-down text-xs"></i> Ver más reseñas ({{ total_reviews|add:"-3" }} restantes)
+                </button>
+                <button id="show-less-btn" class="text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 px-5 py-2 rounded-lg transition inline-flex items-center gap-2 hidden">
+                  <i class="fas fa-chevron-up text-xs"></i> Ver menos
+                </button>
+              </div>
+              {% endif %}
+            {% endwith %}
           {% else %}
             <div class="py-16 text-center">
               <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -177,4 +238,8 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}

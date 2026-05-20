@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .models import UserProfile, Follow  # AÑADIDO Follow
+from .models import UserProfile, Follow
 from .forms import RegistroForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -21,7 +21,7 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from movies.models import Review
-from movies.tmdb_service import get_popular_movies, get_movie_details
+from movies.tmdb_service import get_popular_movies, get_movie_details, get_tv_show_details
 
 # ***********************************************************************************+
                                         # VIEWS
@@ -106,7 +106,7 @@ def user_logout(request):
     logout(request)
     
     messages.success(request, "Cerraste la sesión con anterioridad")
-    return redirect('home')  # Redirige a la página principal
+    return redirect('home')
 
 # ***********************************************************************************+
 
@@ -120,17 +120,27 @@ def mi_perfil(request):
     # Obtener las reseñas del usuario
     reseñas_usuario = Review.objects.filter(user=user).order_by('-created_at')
     
-    # url of the poster of the review
+    # url poster
     for review in reseñas_usuario:
-        # if your review model has the movie_id field and you can get details from TMDB
         try:
-            movie_details = get_movie_details(review.movie_id)
-            if movie_details and movie_details.get('poster_path'):
-                review.movie_poster = f"https://image.tmdb.org/t/p/w200{movie_details['poster_path']}"
+            # get if it's movie or serie
+            if review.movie_id < 0:
+                # is it is serie
+                tv_id = abs(review.movie_id)
+                tv_details = get_tv_show_details(tv_id)
+                if tv_details and tv_details.get('poster_url'):
+                    review.movie_poster = tv_details.get('poster_url')
+                else:
+                    review.movie_poster = None
             else:
-                review.movie_poster = None
-        except:
-            # if none, it give you none
+                # or a movie
+                movie_details = get_movie_details(review.movie_id)
+                if movie_details and movie_details.get('poster_url'):
+                    review.movie_poster = movie_details.get('poster_url')
+                else:
+                    review.movie_poster = None
+        except Exception as e:
+            print(f"Error obteniendo poster para {review.movie_id}: {e}")
             review.movie_poster = None
     
     # popular movies
@@ -155,15 +165,27 @@ def perfil_publico(request, username):
     # Obtener las reseñas del usuario
     reseñas_usuario = Review.objects.filter(user=profile_user).order_by('-created_at')
     
-    # URL del poster de las reseñas
+    # URL del poster de las reseñas - MODIFICADO PARA SERIES
     for review in reseñas_usuario:
         try:
-            movie_details = get_movie_details(review.movie_id)
-            if movie_details and movie_details.get('poster_path'):
-                review.movie_poster = f"https://image.tmdb.org/t/p/w200{movie_details['poster_path']}"
+            #get if the id is - or +
+            if review.movie_id < 0:
+                # if it's a serie
+                tv_id = abs(review.movie_id)
+                tv_details = get_tv_show_details(tv_id)
+                if tv_details and tv_details.get('poster_url'):
+                    review.movie_poster = tv_details.get('poster_url')
+                else:
+                    review.movie_poster = None
             else:
-                review.movie_poster = None
-        except:
+                # if it's a movie
+                movie_details = get_movie_details(review.movie_id)
+                if movie_details and movie_details.get('poster_url'):
+                    review.movie_poster = movie_details.get('poster_url')
+                else:
+                    review.movie_poster = None
+        except Exception as e:
+            print(f"Error obteniendo poster para {review.movie_id}: {e}")
             review.movie_poster = None
     
     # Verificar si el usuario actual sigue a este perfil

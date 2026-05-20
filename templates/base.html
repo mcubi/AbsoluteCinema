@@ -6,6 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Absolute Cinema - {% block title %}Inicio{% endblock %}</title>
 
+    <!--para evitar lo del modo claro al tener el oscuro-->
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'light') {
+          document.documentElement.classList.remove('dark');
+        } else if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else if (prefersDark) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -40,6 +56,16 @@
         },
       };
     </script>
+
+    <!--para evitar-->
+    <style>
+      html:not(.dark) body {
+        background-color: white;
+      }
+      html.dark body {
+        background-color: #050505;
+      }
+    </style>
   </head>
 
   <body
@@ -318,29 +344,6 @@
 
     <script>
       // *************************************************
-      // Lógica de Dark/Light Mode
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme === "light") {
-        document.documentElement.classList.remove("dark");
-      } else if (
-        savedTheme === "dark" ||
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
-        document.documentElement.classList.add("dark");
-      }
-
-      // global
-      window.toggleTheme = function () {
-        if (document.documentElement.classList.contains("dark")) {
-          document.documentElement.classList.remove("dark");
-          localStorage.setItem("theme", "light");
-        } else {
-          document.documentElement.classList.add("dark");
-          localStorage.setItem("theme", "dark");
-        }
-      };
-
-      // *************************************************
       // Lógica Global para "Mi Lista" (Añadir/Quitar)
       function getCookie(name) {
         let cookieValue = null;
@@ -464,6 +467,19 @@
             lastUrl = window.location.href;
         });
     })();
+    </script>
+
+    <!--for the toggle-->
+    <script>
+      window.toggleTheme = function () {
+        if (document.documentElement.classList.contains("dark")) {
+          document.documentElement.classList.remove("dark");
+          localStorage.setItem("theme", "light");
+        } else {
+          document.documentElement.classList.add("dark");
+          localStorage.setItem("theme", "dark");
+        }
+      };
     </script>
 
     {% block extra_js %}{% endblock %}
