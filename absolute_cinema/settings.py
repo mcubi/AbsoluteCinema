@@ -104,6 +104,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('redis', 6379)], # Apunta al contenedor 'redis' de Docker
+            
         },
     },
 }
@@ -113,6 +114,7 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": "redis://redis:6379/1", # Usamos la base de datos 1 para no pisar a los WebSockets (que usan la 0)
+       
     }
 }
 

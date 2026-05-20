@@ -80,6 +80,17 @@
             </div>
         </form>
 
+        {% if query %}
+        <div class="mb-8 p-4 bg-gray-100 dark:bg-white/5 rounded-lg flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                Mostrando resultados de búsqueda para: <span class="font-bold text-gray-900 dark:text-white">"{{ query }}"</span>
+            </p>
+            <a href="{% url 'movies' %}?q={{ query|urlencode }}" class="text-sm font-semibold text-ac-primary hover:underline">
+                Buscar también en Películas &rarr;
+            </a>
+        </div>
+        {% endif %}
+
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
 
             {% for movie in movies %}
