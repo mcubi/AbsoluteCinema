@@ -20,6 +20,8 @@ from django.conf import settings
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from movies.models import Review
+from movies.tmdb_service import get_popular_movies, get_movie_details
 
 # ***********************************************************************************+
                                         # VIEWS
@@ -110,23 +112,35 @@ def user_logout(request):
 
 # USER PROFILE
 
-from django.contrib.auth.decorators import login_required
-
 @login_required
 def mi_perfil(request):
     perfil = request.user.perfil
     user = request.user
     
-    # Importar el modelo de reseñas
-    from movies.models import Review
-    
     # Obtener las reseñas del usuario
     reseñas_usuario = Review.objects.filter(user=user).order_by('-created_at')
+    
+    # url of the poster of the review
+    for review in reseñas_usuario:
+        # if your review model has the movie_id field and you can get details from TMDB
+        try:
+            movie_details = get_movie_details(review.movie_id)
+            if movie_details and movie_details.get('poster_path'):
+                review.movie_poster = f"https://image.tmdb.org/t/p/w200{movie_details['poster_path']}"
+            else:
+                review.movie_poster = None
+        except:
+            # if none, it give you none
+            review.movie_poster = None
+    
+    # popular movies
+    peliculas_recomendadas = get_popular_movies()[:6]  # only 6
     
     return render(request, 'users/mi_perfil.html', {
         'perfil': perfil,
         'user': user,
         'reseñas_usuario': reseñas_usuario,
+        'peliculas_recomendadas': peliculas_recomendadas,
     })
 # ***********************************************************************************+
 
