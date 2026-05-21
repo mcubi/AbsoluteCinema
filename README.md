@@ -1,6 +1,6 @@
 # AbsoluteCinema
 
-A Netflix-style audiovisual review platform, developed as a Final Degree Project (TFG). The app allows users to explore movie and series catalogs, and post reviews of them so other people can talk about the film / serie, and provide extra information for who is interested on it.
+A IMDb-style audiovisual review platform, developed as a Final Degree Project (TFG). The app allows users to explore movie and series catalogs, and post reviews of them so other people can talk about the film / serie, and provide extra information for who is interested on it.
 
 ## Features
 
