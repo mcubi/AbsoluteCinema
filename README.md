@@ -134,6 +134,7 @@ docker compose down -v
 
 ## Project structure:
 
+```
 ABSOLUTECINEMA/
 ├── absolute_cinema/ # Main project config
 │ ├── **init**.py
@@ -167,6 +168,7 @@ ABSOLUTECINEMA/
 ├── dockerfile # Docker configuration
 ├── compose.yml # Docker Compose configuration
 └── db.sqlite3 # SQLite database (development)
+```
 
 ## License
 
