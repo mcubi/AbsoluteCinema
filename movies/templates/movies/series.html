@@ -3,13 +3,6 @@
 
 {% block title %}Series - Absolute Cinema{% endblock %}
 
-{% block global_search %}
-<!-- Bloque vacío para ocultar el buscador global en esta página -->
-{% endblock %}
-{% block mobile_search %}
-<!-- Bloque vacío para ocultar el buscador móvil en esta página -->
-{% endblock %}
-
 {% block content %}
 <div class="min-h-screen bg-white dark:bg-ac-bg pt-10 px-6 pb-20">
     <div class="max-w-[1600px] mx-auto">
@@ -25,7 +18,7 @@
                         </h1>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Explora el contenido directamente desde TMDB</p>
                     </div>
-                    <!-- Campo de búsqueda -->
+                    <!-- Campo de búsqueda interno de la página -->
                     <div class="relative w-full md:w-80 mt-4">
                         <input type="text" name="q" placeholder="Buscar en series..." value="{{ query|default:'' }}" class="w-full bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-full py-2 px-5 pr-12 text-sm focus:ring-2 focus:ring-ac-primary focus:border-ac-primary outline-none transition">
                         <button type="submit" class="absolute right-0 top-0 h-full px-4 text-gray-400 hover:text-ac-primary transition">
@@ -95,7 +88,7 @@
 
             {% for movie in movies %}
 
-            <div class="group relative rounded-xl overflow-hidden cursor-pointer bg-white dark:bg-[#181818] border border-gray-200 dark:border-white/5 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:border-ac-primary/50 block" onclick="window.location.href='/serie/{{ movie.id }}/'">
+            <div class="group relative rounded-xl overflow-hidden cursor-pointer bg-white dark:bg-[#181818] border border-gray-200 dark:border-white/5 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:border-ac-primary/50 block" onclick="window.location.href='/pelicula/{{ movie.id }}/'">
 
                 <div class="aspect-[2/3] w-full relative bg-gray-100 dark:bg-[#111]">
                     {% if movie.poster_url %}

@@ -3,13 +3,6 @@
 
 {% block title %}Películas - Absolute Cinema{% endblock %}
 
-{% block global_search %}
-
-{% endblock %}
-{% block mobile_search %}
-
-{% endblock %}
-
 {% block content %}
 <div class="min-h-screen bg-white dark:bg-ac-bg pt-10 px-6 pb-20">
     <div class="max-w-[1600px] mx-auto">
@@ -25,7 +18,7 @@
                         </h1>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Explora el contenido directamente desde TMDB</p>
                     </div>
-                    <!-- Campo de búsqueda -->
+                    <!-- Campo de búsqueda interno de la página -->
                     <div class="relative w-full md:w-80 mt-4">
                         <input type="text" name="q" placeholder="Buscar en películas..." value="{{ query|default:'' }}" class="w-full bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-full py-2 px-5 pr-12 text-sm focus:ring-2 focus:ring-ac-primary focus:border-ac-primary outline-none transition">
                         <button type="submit" class="absolute right-0 top-0 h-full px-4 text-gray-400 hover:text-ac-primary transition">
