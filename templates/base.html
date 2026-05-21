@@ -57,7 +57,7 @@
     </script>
 
     <style>
-      /* FIX: Prevenir desbordamiento horizontal en toda la página */
+      /* Prevenir desbordamiento horizontal en toda la página */
       html, body {
         overflow-x: hidden !important;
         width: 100% !important;
@@ -72,13 +72,13 @@
         background-color: #050505;
       }
       
-      /* FIX: Asegurar que todos los contenedores no se desborden */
+      /* Asegurar que todos los contenedores no se desborden */
       * {
         max-width: 100%;
         box-sizing: border-box;
       }
       
-      /* FIX CRÍTICO: Menú de perfil - Para que no se corte */
+      /* Menú de perfil - Para que no se corte */
       header {
         overflow: visible !important;
       }
@@ -103,7 +103,7 @@
         z-index: 1000 !important;
       }
       
-      /* FIX: Cuando el menú móvil está abierto, ocultar el scroll y deshabilitar interacciones */
+      /* Cuando el menú móvil está abierto, ocultar el scroll y deshabilitar interacciones */
       body.menu-open {
         overflow: hidden !important;
         position: fixed !important;
@@ -188,14 +188,13 @@
 
           {% if user.is_authenticated %}
 
-          <button
-            class="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition relative"
+          <!--search icon only phones-->
+          <a
+            href="{% url 'movies' %}"
+            class="md:hidden text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
           >
-            <i class="fas fa-bell"></i>
-            <span
-              class="absolute -top-1 -right-1 h-2 w-2 bg-ac-primary rounded-full animate-pulse"
-            ></span>
-          </button>
+            <i class="fas fa-search text-lg"></i>
+          </a>
 
           <!-- Menú de perfil con click -->
           <div class="relative" style="overflow: visible !important;">
@@ -291,7 +290,7 @@
       </div>
     </header>
 
-    <!-- Menú móvil CORREGIDO -->
+    <!-- Menú móvil -->
     <div
       id="mobile-menu-panel"
       class="fixed inset-0 h-full w-full bg-white/95 dark:bg-black/95 backdrop-blur-xl z-[10000] flex flex-col transform transition-transform duration-300 md:hidden overflow-y-auto overflow-x-hidden translate-x-full"

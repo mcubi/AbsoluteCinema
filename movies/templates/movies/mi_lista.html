@@ -53,6 +53,7 @@
                   </div>
                 </div>
                 
+            <!--si no hay nada-->
             {% empty %}
                 <div class="col-span-full py-20 mt-10 flex flex-col items-center justify-center text-center bg-gray-100 dark:bg-[#181818] rounded-2xl border border-gray-200 dark:border-white/5 shadow-xl">
                     <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-gray-200 dark:border-white/10">
@@ -75,7 +76,7 @@
 
 {% block extra_js %}
 <script>
-  // 1. FUNCIÓN PARA LEER EL TOKEN DE SEGURIDAD
+  // FUNCIÓN PARA LEER EL TOKEN DE SEGURIDAD
   function getCookie(name) {
       let cookieValue = null;
       if (document.cookie && document.cookie !== '') {
@@ -91,7 +92,7 @@
       return cookieValue;
   }
 
-  // 2. FUNCIÓN PARA BORRAR DE LA LISTA
+  // FUNCIÓN PARA BORRAR DE LA LISTA
   function removeFromList(button, movieId) {
     // Evitamos que le den 20 clics rápidos
     button.style.pointerEvents = 'none';
@@ -99,7 +100,7 @@
     // Cogemos el token de seguridad
     const csrftoken = getCookie('csrftoken');
 
-    // LLAMAMOS AL BACKEND (Al mismo sitio que en el index)
+    // LLAMAMOS AL BACKEND (al mismo sitio que en el index)
     fetch('/api/toggle-lista/', {
         method: 'POST',
         headers: {
@@ -148,7 +149,7 @@
     });
   }
 
-  // 3. LOGICA PARA FORZAR RECARGA AL VOLVER ATRÁS (EVITAR CACHÉ FANTASMA DEL NAVEGADOR)
+  // LOGICA PARA FORZAR RECARGA AL VOLVER ATRÁS (EVITAR CACHÉ FANTASMA DEL NAVEGADOR)
   window.addEventListener('pageshow', function(event) {
       if (event.persisted) {
           location.reload();
