@@ -192,7 +192,7 @@
           </div>
         </div>
 
-        <!--privacy option-->
+        <!--privacy option - MEJORADO -->
         <div id="section-privacidad" class="section-content hidden">
           <div class="mb-6">
             <h1
@@ -206,38 +206,7 @@
           </div>
 
           <div class="space-y-4">
-            <!--control parental HACER-->
-            <div
-              class="bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/10 opacity-60"
-            >
-              <div class="p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center"
-                  >
-                    <i
-                      class="fas fa-child text-sm text-gray-500 dark:text-gray-400"
-                    ></i>
-                  </div>
-                  <div>
-                    <p
-                      class="font-medium text-sm text-gray-900 dark:text-white"
-                    >
-                      Control parental
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                      Filtrar contenido +18 para menores
-                    </p>
-                  </div>
-                </div>
-                <span
-                  class="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-                  >Próximamente</span
-                >
-              </div>
-            </div>
-
-            <!--change password - AHORA FUNCIONAL -->
+            <!-- change password -->
             <a
               href="{% url 'users:change_password' %}"
               class="block bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/10 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition"
@@ -245,15 +214,15 @@
               <div class="p-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center"
+                    class="w-10 h-10 rounded-full bg-ac-primary/10 flex items-center justify-center"
                   >
                     <i
-                      class="fas fa-key text-sm text-gray-500 dark:text-gray-400"
+                      class="fas fa-key text-sm text-ac-primary"
                     ></i>
                   </div>
                   <div>
                     <p
-                      class="font-medium text-sm text-gray-900 dark:text-white"
+                      class="font-medium text-base text-gray-900 dark:text-white"
                     >
                       Cambiar contraseña
                     </p>
@@ -262,11 +231,11 @@
                     </p>
                   </div>
                 </div>
-                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
               </div>
             </a>
 
-            <!-- DELETE ACCOUNT -->
+            <!-- delete account -->
             <div
               class="bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-red-200 dark:border-red-500/30 cursor-pointer hover:bg-red-50 dark:hover:bg-red-500/5 transition"
               onclick="openDeleteModal()"
@@ -274,7 +243,7 @@
               <div class="p-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center"
+                    class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center"
                   >
                     <i
                       class="fas fa-trash-alt text-sm text-red-500 dark:text-red-400"
@@ -282,7 +251,7 @@
                   </div>
                   <div>
                     <p
-                      class="font-medium text-sm text-gray-900 dark:text-white"
+                      class="font-medium text-base text-gray-900 dark:text-white"
                     >
                       Eliminar cuenta
                     </p>
@@ -292,7 +261,7 @@
                   </div>
                 </div>
                 <span
-                  class="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-500 dark:text-red-400"
+                  class="text-xs px-3 py-1 rounded-full bg-red-100 dark:bg-red-500/10 text-red-500 dark:text-red-400 font-semibold"
                   >Irreversible</span
                 >
               </div>
