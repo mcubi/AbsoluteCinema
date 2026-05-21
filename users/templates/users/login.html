@@ -25,13 +25,15 @@ Absolute Cinema{% endblock %} {% block content %} {% load socialaccount %}
       <span class="font-semibold text-[#d9b0ff]">Absolute Cinema</span>
     </p>
 
-    {% if messages %} {% for message in messages %}
-    <div
-      class="bg-{% if message.tags == 'success' %}green-500{% else %}red-500{% endif %}/20 border border-{% if message.tags == 'success' %}green-500{% else %}red-500{% endif %}/50 text-{% if message.tags == 'success' %}green-200{% else %}red-200{% endif %} px-4 py-2 rounded mb-6 text-sm"
-    >
-      {{ message }}
-    </div>
-    {% endfor %} {% endif %}
+    {% if messages %} 
+      {% for message in messages %}
+        {% if message.tags == 'error' %}
+        <div class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-2 rounded mb-6 text-sm">
+          {{ message }}
+        </div>
+        {% endif %}
+      {% endfor %} 
+    {% endif %}
 
     <form method="POST" action="{% url 'users:log_in' %}" class="space-y-6">
       {% csrf_token %}
