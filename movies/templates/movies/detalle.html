@@ -114,11 +114,11 @@
             <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ pelicula.vote_count }} votos</div>
           </div>
 
-          <!--if it's release or not ARREGLAR-->
+          <!-- FIX: Estado corregido - usa el campo 'status' de la API -->
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
             <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">ESTADO</div>
             <div class="text-2xl font-bold text-ac-primary mt-1">
-              {% if pelicula.release_date %}Estrenada{% else %}Próximamente{% endif %}
+              {{ pelicula.status|default:"Estrenada" }}
             </div>
           </div>
         </div>
