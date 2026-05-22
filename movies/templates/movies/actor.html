@@ -34,7 +34,7 @@
           <span class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">
             {{ persona.known_for_department }}
           </span>
-          
+          <!--birthday and death info-->
           {% if persona.birthday %}
           <span class="text-ac-primary">•</span>
           <span class="text-gray-600 dark:text-gray-300">
@@ -64,6 +64,7 @@
 
       </div>
     </div>
+
     <!--movies they are in-->
     {% if persona.filmography %}
     <div class="mb-10 mt-4">
@@ -74,6 +75,7 @@
       
       <div class="relative group/slider">
         
+        <!--for the scroll-->
         <div class="hidden md:flex absolute left-0 top-0 h-36 w-32 bg-gradient-to-r from-white dark:from-ac-bg via-white/80 dark:via-ac-bg/80 to-transparent z-10 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 pointer-events-none items-center justify-start pl-2">
             <button onclick="scrollFilmography(-1)" class="pointer-events-auto bg-black/80 hover:bg-ac-primary text-white w-10 h-10 flex items-center justify-center rounded-full transition shadow-[0_0_15px_rgba(0,0,0,0.5)] cursor-pointer">
                 <i class="fas fa-chevron-left"></i>

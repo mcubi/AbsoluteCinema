@@ -100,14 +100,16 @@ def detalle_pelicula(request, movie_id):
 
 
 # --- CATÁLOGO DE PELÍCULAS ---
+# --- CATÁLOGO DE PELÍCULAS (CORREGIDO) ---
+# --- CATÁLOGO DE PELÍCULAS (CORREGIDO - sin provider en discover_movies) ---
 def catalogo_peliculas(request):
     filtro_actual = request.GET.get('filtro', 'populares')
     genero_actual = request.GET.get('genre')
-    provider_actual = request.GET.get('provider')
+    provider_actual = request.GET.get('provider')  # Este se usa SOLO para series
     query = request.GET.get('q')
     
     # Creamos una clave de caché única según los filtros dinámicos que use el usuario
-    cache_key = f"catalogo_movies_{filtro_actual}_{genero_actual}_{provider_actual}_{query}"
+    cache_key = f"catalogo_movies_{filtro_actual}_{genero_actual}_{query}"
     cached_catalog = cache.get(cache_key)
     
     if cached_catalog:
@@ -117,17 +119,22 @@ def catalogo_peliculas(request):
     else:
         generos = get_movie_genres()
         providers = get_watch_providers('movie')
+        
         if query:
             peliculas = search_movies(query)
         else:
-            peliculas = discover_movies(sort_by=filtro_actual, genre=genero_actual, provider=provider_actual)
+            # FIX: Para 'cartelera' (Novedades) usar get_now_playing_movies()
+            if filtro_actual == 'cartelera':
+                peliculas = get_now_playing_movies()
+            else:
+                # discover_movies NO acepta 'provider', solo sort_by y genre
+                peliculas = discover_movies(sort_by=filtro_actual, genre=genero_actual)
             
         # Almacenamos los resultados de TMDb por 10 minutos
         cache.set(cache_key, {'genres': generos, 'providers': providers, 'movies': peliculas}, 600)
 
     mis_peliculas_ids = []
     if request.user.is_authenticated:
-        # Aquí solo queremos las pelis (IDs positivos)
         mis_peliculas_ids = list(MiLista.objects.filter(user=request.user, movie_id__gt=0).values_list('movie_id', flat=True))
         
     return render(request, 'movies/peliculas.html', {
@@ -214,7 +221,8 @@ def toggle_lista(request):
         return JsonResponse({'error': str(e)}, status=400)
 
 
-# --- CATÁLOGO DE SERIES ---
+# --- CATÁLOGO DE SERIES (CORREGIDO) ---
+# --- CATÁLOGO DE SERIES (CORREGIDO - usa get_tv_shows con endpoint correcto) ---
 def catalogo_series(request):
     filtro_actual = request.GET.get('filtro', 'populares')
     genero_actual = request.GET.get('genre')
@@ -234,13 +242,21 @@ def catalogo_series(request):
         if query:
             series = search_tv_shows(query)
         else:
-            series = discover_tv_shows(sort_by=filtro_actual, genre=genero_actual, provider=provider_actual)
+            # FIX: Para 'emision' usar get_tv_shows que internamente usa tv/on_the_air
+            if filtro_actual == 'emision':
+                series = get_tv_shows(filtro='emision')
+            else:
+                series = discover_tv_shows(sort_by=filtro_actual, genre=genero_actual, provider=provider_actual)
         cache.set(cache_key, {'genres': generos, 'providers': providers, 'series': series}, 600)
 
-    mis_peliculas_ids = {}
+    # Convertir los IDs de las series a NEGATIVOS
+    for serie in series:
+        if 'id' in serie:
+            serie['id'] = -abs(serie['id'])
+
+    mis_peliculas_ids = []
     if request.user.is_authenticated:
-        ids_negativos = list(MiLista.objects.filter(user=request.user, movie_id__lt=0).values_list('movie_id', flat=True))
-        mis_peliculas_ids = {abs(id) for id in ids_negativos}
+        mis_peliculas_ids = list(MiLista.objects.filter(user=request.user, movie_id__lt=0).values_list('movie_id', flat=True))
 
     return render(request, 'movies/series.html', {
         'movies': series,
@@ -273,11 +289,11 @@ def detalle_serie(request, series_id):
     # y el botón de "Mi Lista" sepan sin dudarlo que están tratando con una serie
     serie['id'] = -abs(series_id)
         
-    mis_peliculas_ids = set()
+    mis_peliculas_ids = []
     if request.user.is_authenticated:
         # Comprobamos en la base de datos con el ID negativo
         if MiLista.objects.filter(user=request.user, movie_id=-abs(series_id)).exists():
-            mis_peliculas_ids = {-abs(series_id)}
+            mis_peliculas_ids = [-abs(series_id)]
     
     return render(request, 'movies/detalle.html', {
         'pelicula': serie,

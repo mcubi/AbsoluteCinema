@@ -33,7 +33,7 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['86.48.0.122', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['alumnos.miralmontefp.es', '86.48.0.122', 'localhost', '127.0.0.1']
 
 
 # APPS DEFINITION:

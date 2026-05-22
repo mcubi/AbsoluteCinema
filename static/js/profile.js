@@ -64,6 +64,51 @@ function initReviewsToggle() {
     }
 }
 
+// follow/unfollow functionality
+function followUser(userId) {
+    fetch(`/users/seguir/${userId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error al seguir al usuario');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al seguir al usuario');
+    });
+}
+
+function unfollowUser(userId) {
+    fetch(`/users/dejar-de-seguir/${userId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error al dejar de seguir al usuario');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al dejar de seguir al usuario');
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initReviewsToggle();
 });

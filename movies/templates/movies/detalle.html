@@ -8,18 +8,22 @@
 {% block content %}
 <div class="bg-white dark:bg-ac-bg min-h-screen">
   <div class="container mx-auto px-4 py-8 pt-24">
+
+    <!--to go back-->
     <div class="mb-6">
       <a href="javascript:history.back()" class="text-gray-500 dark:text-gray-400 hover:text-ac-primary transition text-sm flex items-center gap-2 w-fit">
         <i class="fas fa-arrow-left"></i> Volver atrás
       </a>
     </div>
 
+    <!--poster-->
     <div class="flex flex-col md:flex-row gap-8 mb-8">
       <div class="md:w-1/4">
         <div class="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.2)]">
           <img src="{{ pelicula.poster_url|default:'https://via.placeholder.com/500x750?text=No+Poster' }}" alt="{{ pelicula.title }}" class="w-full" />
         </div>
 
+        <!--trailer-->
         <div class="mt-4 flex gap-2">
           <a href="https://www.youtube.com/results?search_query={{ pelicula.title|urlencode }}+trailer+oficial+español" target="_blank" rel="noopener noreferrer" class="flex-1 bg-ac-primary hover:bg-ac-primary-dark text-white px-4 py-3 rounded-lg font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition hover:-translate-y-1 flex items-center justify-center gap-2">
             <i class="fas fa-play"></i> VER TRÁILER
@@ -32,6 +36,7 @@
           </button>
         </div>
 
+        <!--say in what platforms is it-->
         <div class="mt-6 text-center bg-gray-100 dark:bg-[#181818] rounded-xl p-4 border border-gray-200 dark:border-white/5">
           <p class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-3">
             DISPONIBLE EN
@@ -41,6 +46,8 @@
               {% for provider in pelicula.providers %}
               <img src="{{ provider.logo_url }}" loading="lazy" alt="{{ provider.name }}" title="{{ provider.name }}" class="w-10 h-10 rounded-lg shadow-[0_0_10px_rgba(255,255,255,0.1)] border border-gray-200 dark:border-white/10 hover:scale-110 transition cursor-help" />
               {% endfor %} 
+
+            <!--if it no has any platform-->
             {% else %}
               <span class="text-gray-500 dark:text-gray-400 text-xs italic">No disponible en streaming</span>
             {% endif %}
@@ -48,11 +55,13 @@
         </div>
       </div>
 
+      <!--some info-->
       <div class="md:w-3/4 text-gray-900 dark:text-white">
         <h1 class="text-4xl md:text-6xl font-brand tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-ac-primary to-gray-700 dark:to-gray-300 mb-2">
           {{ pelicula.title }}
         </h1>
 
+        <!--check if it's a serie or a movie-->
         <div class="flex items-center gap-3 flex-wrap mb-6 text-sm font-semibold">
           <span class="bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300">
             {% if pelicula.id < 0 %}Serie TV{% else %}Película{% endif %}
@@ -61,6 +70,7 @@
 
           <span class="text-gray-600 dark:text-gray-300">{{ pelicula.release_date|slice:":4"|default:"N/A" }}</span>
 
+          <!--if it's a serie it show the episodes, if it's a movie show the minutes-->
           <span class="text-ac-primary">•</span>
           <span class="text-gray-600 dark:text-gray-300">
             {% if pelicula.id < 0 %}
@@ -71,6 +81,8 @@
           </span>
 
           <span class="text-ac-primary">•</span>
+
+          <!--original language-->
           <span class="text-gray-600 dark:text-gray-300 uppercase">{{ pelicula.original_language }}</span>
         </div>
 
@@ -79,18 +91,20 @@
           {{ pelicula.tagline }}
         </p>
         {% endif %}
-
+        
         <h2 class="text-gray-900 dark:text-white font-bold mb-2 text-xl">Sinopsis</h2>
         <p class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-8 max-w-4xl font-light">
           {{ pelicula.overview|default:"Sin sinopsis disponible en español." }}
         </p>
 
+        <!--info-->
         <div class="flex flex-wrap gap-6 mb-8 border-b border-gray-200 dark:border-white/10 pb-2">
           <a href="#" class="text-ac-primary border-b-2 border-ac-primary pb-2 text-sm font-bold uppercase tracking-wider">Info Principal</a>
           <a href="#reviews" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-bold uppercase tracking-wider">Reseñas</a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <!--rate of the movie-->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
             <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">NOTA TMDB</div>
             <div class="flex items-center justify-center gap-2">
@@ -100,24 +114,18 @@
             <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">{{ pelicula.vote_count }} votos</div>
           </div>
 
-          <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
-            <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">TU PUNTUACIÓN</div>
-            <a href="#" class="flex flex-col items-center justify-center gap-1 group cursor-pointer">
-              <i class="far fa-star text-2xl text-gray-500 dark:text-gray-500 group-hover:text-ac-primary transition transform group-hover:scale-110"></i>
-              <span class="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:roup-hover:text-white text-xs transition">Haz clic para puntuar</span>
-            </a>
-          </div>
-
+          <!-- FIX: Estado corregido - usa el campo 'status' de la API -->
           <div class="bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-white/5 rounded-xl p-4 text-center hover:border-ac-primary/30 transition">
             <div class="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">ESTADO</div>
             <div class="text-2xl font-bold text-ac-primary mt-1">
-              {% if pelicula.release_date %}Estrenada{% else %}Próximamente{% endif %}
+              {{ pelicula.status|default:"Estrenada" }}
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!--show the cast-->
     {% if pelicula.cast %}
     <div class="mb-10 mt-4">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Reparto y equipo</h2>
@@ -141,6 +149,7 @@
     </div>
     {% endif %}
 
+    <!--director-->
     {% if pelicula.director %}
     <div class="mb-8">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 border-l-4 border-ac-primary pl-3">Director</h2>
@@ -148,6 +157,7 @@
     </div>
     {% endif %}
 
+    <!--movie genres-->
     <div class="mb-12">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 border-l-4 border-ac-primary pl-3">Géneros</h2>
       <div class="flex flex-wrap gap-2">
@@ -157,6 +167,8 @@
       </div>
     </div>
 
+
+    <!--reviews-->
     <div id="reviews" class="mb-12">
       <div class="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-white/10 pb-4">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white border-l-4 border-ac-primary pl-3">
@@ -178,6 +190,8 @@
         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Escribe tu reseña</h3>
         <form id="review-form-element" class="space-y-4">
           <div>
+
+            <!--star review-->
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puntuación</label>
             <div class="flex gap-2" id="rating-stars">
               <button type="button" onclick="setRating(1)" class="star-btn text-2xl text-gray-300 hover:text-yellow-500 transition"><i class="fas fa-star"></i></button>
@@ -215,7 +229,7 @@
 
 {% block extra_js %}
 <script>
-  // Variables globales necesarias para el script externo
+  // for the external script
   window.movieId = "{{ pelicula.id }}";
   window.movieTitle = "{{ pelicula.title|escapejs }}";
   window.currentUsername = "{{ user.username|default:'' }}";

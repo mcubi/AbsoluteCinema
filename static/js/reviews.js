@@ -176,7 +176,11 @@ function addReviewToList(review) {
             ${avatarHtml}
             <div class="flex-1">
                 <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-bold text-gray-900 dark:text-white">${escapeHtml(review.user)}</h4>
+                    <h4 class="font-bold text-gray-900 dark:text-white">
+                        <a href="/users/perfil/${escapeHtml(review.user)}/" class="hover:text-ac-primary transition">
+                            ${escapeHtml(review.user)}
+                        </a>
+                    </h4>
                     <div class="flex items-center gap-3">
                         <span class="text-sm text-gray-500">${review.created_at}</span>
                         ${deleteButton}
@@ -241,7 +245,11 @@ function addReplyToContainer(container, reply) {
             ${replyAvatarHtml}
             <div class="flex-1">
                 <div class="flex items-center justify-between mb-1">
-                    <h5 class="font-semibold text-gray-900 dark:text-white text-sm">${escapeHtml(reply.user)}</h5>
+                    <h5 class="font-semibold text-gray-900 dark:text-white text-sm">
+                        <a href="/users/perfil/${escapeHtml(reply.user)}/" class="hover:text-ac-primary transition">
+                            ${escapeHtml(reply.user)}
+                        </a>
+                    </h5>
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-gray-500">${reply.created_at}</span>
                         ${deleteButton}

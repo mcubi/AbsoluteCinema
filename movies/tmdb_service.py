@@ -1,6 +1,7 @@
 import requests
 import random
 from django.conf import settings
+from datetime import datetime
 
 # Settings API TMDb
 API_KEY = settings.TMDB_API_KEY
@@ -33,7 +34,33 @@ def get_popular_movies():
 
 
 def get_now_playing_movies():
+    """Películas que están actualmente en cines (NOVEDADES)"""
     url = f"{BASE_URL}/movie/now_playing?api_key={API_KEY}&language=es-ES&page=1&include_adult=false"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        movies = response.json().get('results', [])[:20]
+        formatted_movies = []
+        for movie in movies:
+            formatted_movies.append({
+                'id': movie['id'],
+                'title': movie['title'],
+                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
+                'backdrop_url': BACKDROP_BASE_URL,
+                'backdrop_path': movie.get('backdrop_path'),
+                'vote_average': movie['vote_average'],
+                'vote_count': movie.get('vote_count', 0),
+                'release_date': movie.get('release_date', ''),
+                'overview': movie.get('overview', ''),
+                'original_language': movie.get('original_language', '').upper(),
+            })
+        return formatted_movies
+    return []
+
+
+def get_upcoming_movies():
+    """Películas que se estrenarán pronto (PRÓXIMAMENTE)"""
+    url = f"{BASE_URL}/movie/upcoming?api_key={API_KEY}&language=es-ES&page=1&include_adult=false"
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -86,7 +113,6 @@ def filtrar_por_certificacion(peliculas):
     
     for pelicula in peliculas:
         movie_id = pelicula['id']
-        # call to obtain movies certifications
         url = f"{BASE_URL}/movie/{movie_id}/release_dates?api_key={API_KEY}"
         response = requests.get(url)
         
@@ -94,7 +120,6 @@ def filtrar_por_certificacion(peliculas):
             data = response.json()
             certificaciones = data.get('results', [])
             
-            # search the spanish certification
             certificacion_x = False
             for pais in certificaciones:
                 if pais.get('iso_3166_1') == 'ES':
@@ -104,36 +129,31 @@ def filtrar_por_certificacion(peliculas):
                             break
                     break
             
-            # if it has not an x certification, we keep it
             if not certificacion_x:
                 peliculas_filtradas.append(pelicula)
         else:
-            
             peliculas_filtradas.append(pelicula)
     
     return peliculas_filtradas
 
 
 def get_movie_details(movie_id):
-    # Hemos añadido ",videos" al final de la URL para traer los trailers
     url = f"{BASE_URL}/movie/{movie_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos&include_adult=false"
     response = requests.get(url)
     
     if response.status_code == 200:
         data = response.json()
         
-        # CAST
         cast = []
         if 'credits' in data and 'cast' in data['credits']:
             for actor in data['credits']['cast'][:12]:
                 cast.append({
-                    'id': actor.get('id'),  # id actor
+                    'id': actor.get('id'),
                     'name': actor.get('name'),
                     'character': actor.get('character'),
                     'profile_path': actor.get('profile_path'),
                 })
         
-        # --- DIRECTOR ---
         director = None
         if 'credits' in data and 'crew' in data['credits']:
             for crew_member in data['credits']['crew']:
@@ -141,7 +161,6 @@ def get_movie_details(movie_id):
                     director = crew_member.get('name')
                     break
         
-        # --- GÉNEROS ---
         genres = []
         if 'genres' in data:
             for genre in data['genres']:
@@ -150,13 +169,9 @@ def get_movie_details(movie_id):
                     'name': genre.get('name'),
                 })
 
-        # --- PLATAFORMAS DE STREAMING (ESPAÑA) ---
         providers = []
         if 'watch/providers' in data and 'results' in data['watch/providers']:
-            # Buscamos 'ES' para España (si quieres de otro país, cambia el código)
             es_data = data['watch/providers']['results'].get('ES', {})
-            
-            # 'flatrate' significa que está en suscripción mensual (Netflix, Max, Prime, etc.)
             if 'flatrate' in es_data:
                 for prov in es_data['flatrate']:
                     providers.append({
@@ -164,13 +179,24 @@ def get_movie_details(movie_id):
                         'logo_url': f"https://image.tmdb.org/t/p/original{prov.get('logo_path')}" if prov.get('logo_path') else None
                     })
                     
-        # --- TRÁILER ---
         trailer_key = None
         if 'videos' in data and 'results' in data['videos']:
             for video in data['videos']['results']:
                 if video.get('site') == 'YouTube' and video.get('type') == 'Trailer':
                     trailer_key = video.get('key')
-                    break # Nos quedamos con el primero que encuentre
+                    break
+        
+        # Calcular estado de estreno
+        release_date_str = data.get('release_date', '')
+        status = "Estrenada"
+        if release_date_str:
+            try:
+                release_date = datetime.strptime(release_date_str, '%Y-%m-%d').date()
+                today = datetime.now().date()
+                if release_date > today:
+                    status = "Próximamente"
+            except ValueError:
+                pass
         
         movie_details = {
             'id': data.get('id'),
@@ -183,23 +209,22 @@ def get_movie_details(movie_id):
             'backdrop_url': BACKDROP_BASE_URL,
             'vote_average': data.get('vote_average', 0),
             'vote_count': data.get('vote_count', 0),
-            'release_date': data.get('release_date', ''),
+            'release_date': release_date_str,
             'runtime': data.get('runtime', 0),
             'original_language': data.get('original_language', '').upper(),
             'genres': genres,
             'cast': cast,
             'director': director,
             'providers': providers,
-            'trailer_key': trailer_key, # <-- Añadimos la clave del vídeo aquí
+            'trailer_key': trailer_key,
+            'status': status,
         }
         return movie_details
     
     return None
 
 
-# for the random movies
 def get_random_popular_movies(limit=10):
-    
     years = [2020, 2021, 2022, 2023, 2024, 2025, 2019, 2018, 2017, 2016]
     random_years = random.sample(years, min(5, len(years)))
     
@@ -225,56 +250,108 @@ def get_random_popular_movies(limit=10):
                     'original_language': movie.get('original_language', '').upper(),
                 })
     
-    # suffle for the movies
     random.shuffle(all_movies)
-    
-    # Filter movies with X certification
     all_movies = filtrar_por_certificacion(all_movies)
     
     return all_movies[:limit]
 
 
 # --- FUNCIÓN PARA SERIES ---
+# --- FUNCIÓN PARA SERIES (CORREGIDA - ordena por fecha más reciente en 'emision') ---
 def get_tv_shows(filtro='populares', page=1, genre_id=None):
-    endpoints = {
-        'populares': 'tv/popular',
-        'valoradas': 'tv/top_rated',
-        'emision': 'tv/on_the_air'
-    }
+    """Obtiene series según el filtro: 'populares', 'valoradas', o 'emision'"""
     
-    # Si hay un género, usamos discover, si no, los endpoints de siempre
-    endpoint = 'discover/tv' if genre_id else endpoints.get(filtro, 'tv/popular')
-    url = f"{BASE_URL}/{endpoint}?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
-    
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
+    if filtro == 'emision':
+        # Para 'emision' usamos discover con sort_by=first_air_date.desc para obtener las más nuevas
+        url = f"{BASE_URL}/discover/tv?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false&sort_by=first_air_date.desc"
         
-        series = data.get('results', [])[:20]
-        formatted_series = []
-        for show in series:
-            formatted_series.append({
-                'id': show['id'],
-                'title': show.get('name', 'Sin título'),
-                'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
-                'backdrop_url': BACKDROP_BASE_URL,
-                'backdrop_path': show.get('backdrop_path'),
-                'vote_average': show.get('vote_average', 0),
-                'vote_count': show.get('vote_count', 0),
-                'release_date': show.get('first_air_date', ''),
-                'overview': show.get('overview', ''),
-                'original_language': show.get('original_language', '').upper(),
-            })
+        # Filtro adicional: solo series que ya han empezado (fecha <= hoy)
+        today = datetime.now().date()
+        url += f"&first_air_date.lte={today}"
+        
+        # Opcional: filtrar series que no han terminado (status=Returning Series)
+        # Esto no se puede hacer directamente en discover, pero podemos filtrar después
+        
+        if genre_id:
+            url += f"&with_genres={genre_id}"
             
-        return formatted_series
-    except requests.RequestException as e:
-        print(f"Error al obtener series ({filtro}): {e}")
-        return []
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            series = data.get('results', [])[:20]
+            formatted_series = []
+            for show in series:
+                # Validar que la serie esté en emisión (opcional, basado en fecha)
+                first_air = show.get('first_air_date', '')
+                if first_air:
+                    try:
+                        first_air_date = datetime.strptime(first_air, '%Y-%m-%d').date()
+                        if first_air_date > today:
+                            continue  # Saltar series que aún no se han estrenado
+                    except ValueError:
+                        pass
+                
+                formatted_series.append({
+                    'id': show['id'],
+                    'title': show.get('name', 'Sin título'),
+                    'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
+                    'backdrop_url': BACKDROP_BASE_URL,
+                    'backdrop_path': show.get('backdrop_path'),
+                    'vote_average': show.get('vote_average', 0),
+                    'vote_count': show.get('vote_count', 0),
+                    'release_date': show.get('first_air_date', ''),
+                    'overview': show.get('overview', ''),
+                    'original_language': show.get('original_language', '').upper(),
+                })
+                
+            return formatted_series
+        except requests.RequestException as e:
+            print(f"Error al obtener series en emisión: {e}")
+            return []
+    
+    else:
+        # Para 'populares' y 'valoradas' usar los endpoints tradicionales
+        endpoints = {
+            'populares': 'tv/popular',
+            'valoradas': 'tv/top_rated',
+        }
+        endpoint = endpoints.get(filtro, 'tv/popular')
+        url = f"{BASE_URL}/{endpoint}?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
+        
+        if genre_id:
+            url += f"&with_genres={genre_id}"
+        
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            series = data.get('results', [])[:20]
+            formatted_series = []
+            for show in series:
+                formatted_series.append({
+                    'id': show['id'],
+                    'title': show.get('name', 'Sin título'),
+                    'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
+                    'backdrop_url': BACKDROP_BASE_URL,
+                    'backdrop_path': show.get('backdrop_path'),
+                    'vote_average': show.get('vote_average', 0),
+                    'vote_count': show.get('vote_count', 0),
+                    'release_date': show.get('first_air_date', ''),
+                    'overview': show.get('overview', ''),
+                    'original_language': show.get('original_language', '').upper(),
+                })
+                
+            return formatted_series
+        except requests.RequestException as e:
+            print(f"Error al obtener series ({filtro}): {e}")
+            return []
+
 
 # --- FUNCIÓN PARA DETALLE DE SERIES ---
 def get_tv_show_details(series_id):
-    # ¡NUEVO! Hemos añadido ",videos" al final de la URL
     url = f"{BASE_URL}/tv/{series_id}?api_key={API_KEY}&language=es-ES&append_to_response=credits,watch/providers,videos&include_adult=false"
     response = requests.get(url)
     
@@ -285,7 +362,7 @@ def get_tv_show_details(series_id):
         if 'credits' in data and 'cast' in data['credits']:
             for actor in data['credits']['cast'][:12]:
                 cast.append({
-                    'id': actor.get('id'),  # actor id
+                    'id': actor.get('id'),
                     'name': actor.get('name'),
                     'character': actor.get('character'),
                     'profile_path': actor.get('profile_path'),
@@ -310,13 +387,40 @@ def get_tv_show_details(series_id):
                         'logo_url': f"https://image.tmdb.org/t/p/original{prov.get('logo_path')}" if prov.get('logo_path') else None
                     })
                     
-        # --- TRÁILER ---
         trailer_key = None
         if 'videos' in data and 'results' in data['videos']:
             for video in data['videos']['results']:
                 if video.get('site') == 'YouTube' and video.get('type') == 'Trailer':
                     trailer_key = video.get('key')
                     break
+        
+        # Calcular estado de emisión
+        first_air_date_str = data.get('first_air_date', '')
+        status_text = "Estrenada"
+        if first_air_date_str:
+            try:
+                first_air_date = datetime.strptime(first_air_date_str, '%Y-%m-%d').date()
+                today = datetime.now().date()
+                if first_air_date > today:
+                    status_text = "Próximamente"
+            except ValueError:
+                pass
+        
+        # Usar el status de la API si está disponible
+        api_status = data.get('status', '')
+        if api_status == 'Returning Series':
+            status_text = "En Emisión"
+        elif api_status == 'Planned' or api_status == 'In Production':
+            if first_air_date_str:
+                try:
+                    first_air_date = datetime.strptime(first_air_date_str, '%Y-%m-%d').date()
+                    today = datetime.now().date()
+                    if first_air_date > today:
+                        status_text = "Próximamente"
+                except ValueError:
+                    status_text = "Próximamente"
+            else:
+                status_text = "Próximamente"
         
         movie_details = {
             'id': data.get('id'),
@@ -329,23 +433,22 @@ def get_tv_show_details(series_id):
             'backdrop_url': BACKDROP_BASE_URL,
             'vote_average': data.get('vote_average', 0),
             'vote_count': data.get('vote_count', 0),
-            'release_date': data.get('first_air_date', ''),
+            'release_date': first_air_date_str,
             'runtime': data.get('episode_run_time', [0])[0] if data.get('episode_run_time') else 0,
             'original_language': data.get('original_language', '').upper(),
             'genres': genres,
             'cast': cast,
             'director': director,
             'providers': providers,
-            'trailer_key': trailer_key, # <-- Añadimos la clave del vídeo aquí
-            'number_of_seasons': data.get('number_of_seasons'),   # <-- TEMPORADAS
-            'number_of_episodes': data.get('number_of_episodes'), # <-- EPISODIOS
+            'trailer_key': trailer_key,
+            'number_of_seasons': data.get('number_of_seasons'),
+            'number_of_episodes': data.get('number_of_episodes'),
+            'status': status_text,
         }
         return movie_details
     return None
 
-# ******************************************************************************************************************
 
-# details of the actor
 def get_person_details(person_id):
     url = f"{BASE_URL}/person/{person_id}?api_key={API_KEY}&language=es-ES&append_to_response=combined_credits"
     response = requests.get(url)
@@ -353,15 +456,11 @@ def get_person_details(person_id):
     if response.status_code == 200:
         data = response.json()
         
-        # movies they worked in
         filmografia = []
         if 'combined_credits' in data and 'cast' in data['combined_credits']:
-            # the newest to the oldest
             peliculas = data['combined_credits']['cast']
-            # Un pequeño fix para que ordene bien tanto pelis como series
             peliculas.sort(key=lambda x: x.get('release_date', '') or x.get('first_air_date', ''), reverse=True)
             
-            # ¡MAGIA! Quitamos el [:20] para que cargue TODA la filmografía
             for pelicula in peliculas:  
                 filmografia.append({
                     'id': pelicula.get('id'),
@@ -370,13 +469,11 @@ def get_person_details(person_id):
                     'character': pelicula.get('character', ''),
                     'release_date': pelicula.get('release_date', '') or pelicula.get('first_air_date', ''),
                     'vote_average': pelicula.get('vote_average', 0),
-                    'media_type': pelicula.get('media_type', 'movie'),  # movie or tv
+                    'media_type': pelicula.get('media_type', 'movie'),
                 })
         
-        # what they do
         known_for_department = data.get('known_for_department', 'Actuación')
         
-        # to spanish
         dept_traducciones = {
             'Acting': 'Actuación',
             'Directing': 'Dirección',
@@ -409,7 +506,7 @@ def get_person_details(person_id):
         return person_details
     return None
 
-# --- FUNCIONES PARA GÉNEROS ---
+
 def get_movie_genres():
     url = f"{BASE_URL}/genre/movie/list?api_key={API_KEY}&language=es-ES"
     try:
@@ -419,6 +516,7 @@ def get_movie_genres():
     except requests.RequestException as e:
         print(f"Error al obtener géneros de películas: {e}")
         return []
+
 
 def get_tv_genres():
     url = f"{BASE_URL}/genre/tv/list?api_key={API_KEY}&language=es-ES"
@@ -430,17 +528,12 @@ def get_tv_genres():
         print(f"Error al obtener géneros de series: {e}")
         return []
 
-# --- FUNCIÓN PARA OBTENER PROVEEDORES DE STREAMING ---
+
 def get_watch_providers(media_type='movie'):
-    """
-    Obtiene una lista de proveedores de streaming para España.
-    media_type puede ser 'movie' o 'tv'.
-    """
     url = f"{BASE_URL}/watch/providers/{media_type}?api_key={API_KEY}&language=es-ES&watch_region=ES"
     try:
         response = requests.get(url)
         response.raise_for_status()
-        # Ordenamos por popularidad (display_priority) para mostrar primero los más conocidos
         providers = sorted(
             response.json().get('results', []),
             key=lambda p: p.get('display_priority', 999)
@@ -450,8 +543,9 @@ def get_watch_providers(media_type='movie'):
         print(f"Error al obtener proveedores de streaming: {e}")
         return []
 
-# --- FUNCIONES DE DISCOVER ---
+
 def discover_movies(sort_by='populares', genre=None, page=1):
+    """Descubre películas con filtros (NO acepta provider para evitar errores)"""
     url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
 
     sort_map = {
@@ -462,7 +556,7 @@ def discover_movies(sort_by='populares', genre=None, page=1):
     url += f"&sort_by={sort_map.get(sort_by, 'popularity.desc')}"
 
     if sort_by == 'valoradas':
-        url += "&vote_count.gte=200" # Para mejores resultados en 'valoradas'
+        url += "&vote_count.gte=200"
 
     if genre:
         url += f"&with_genres={genre}"
@@ -483,6 +577,7 @@ def discover_movies(sort_by='populares', genre=None, page=1):
     except requests.RequestException as e:
         print(f"Error en discover_movies: {e}")
         return []
+
 
 def discover_tv_shows(sort_by='populares', genre=None, provider=None, page=1):
     url = f"{BASE_URL}/discover/tv?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
@@ -520,101 +615,7 @@ def discover_tv_shows(sort_by='populares', genre=None, provider=None, page=1):
         print(f"Error en discover_tv_shows: {e}")
         return []
 
-# --- FUNCIONES PARA GÉNEROS ---
-def get_movie_genres():
-    url = f"{BASE_URL}/genre/movie/list?api_key={API_KEY}&language=es-ES"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json().get('genres', [])
-    except requests.RequestException as e:
-        print(f"Error al obtener géneros de películas: {e}")
-        return []
 
-def get_tv_genres():
-    url = f"{BASE_URL}/genre/tv/list?api_key={API_KEY}&language=es-ES"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json().get('genres', [])
-    except requests.RequestException as e:
-        print(f"Error al obtener géneros de series: {e}")
-        return []
-
-# --- FUNCIONES DE DISCOVER ---
-def discover_movies(sort_by='populares', genre=None, provider=None, page=1):
-    url = f"{BASE_URL}/discover/movie?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
-
-    sort_map = {
-        'populares': 'popularity.desc',
-        'valoradas': 'vote_average.desc',
-        'cartelera': 'primary_release_date.desc'
-    }
-    url += f"&sort_by={sort_map.get(sort_by, 'popularity.desc')}"
-
-    if sort_by == 'valoradas':
-        url += "&vote_count.gte=200" # Para mejores resultados en 'valoradas'
-
-    if genre:
-        url += f"&with_genres={genre}"
-
-    if provider:
-        url += f"&with_watch_providers={provider}&watch_region=ES"
-
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        movies = response.json().get('results', [])
-        return [
-            {
-                'id': movie['id'],
-                'title': movie['title'],
-                'poster_url': f"{POSTER_BASE_URL}{movie['poster_path']}" if movie.get('poster_path') else None,
-                'vote_average': movie['vote_average'],
-                'release_date': movie.get('release_date', ''),
-            } for movie in movies
-        ]
-    except requests.RequestException as e:
-        print(f"Error en discover_movies: {e}")
-        return []
-
-def discover_tv_shows(sort_by='populares', genre=None, provider=None, page=1):
-    url = f"{BASE_URL}/discover/tv?api_key={API_KEY}&language=es-ES&page={page}&include_adult=false"
-
-    sort_map = {
-        'populares': 'popularity.desc',
-        'valoradas': 'vote_average.desc',
-        'emision': 'first_air_date.desc'
-    }
-    url += f"&sort_by={sort_map.get(sort_by, 'popularity.desc')}"
-
-    if sort_by == 'valoradas':
-        url += "&vote_count.gte=100"
-
-    if genre:
-        url += f"&with_genres={genre}"
-
-    if provider:
-        url += f"&with_watch_providers={provider}&watch_region=ES"
-
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        series = response.json().get('results', [])
-        return [
-            {
-                'id': show['id'],
-                'title': show.get('name', 'Sin título'),
-                'poster_url': f"{POSTER_BASE_URL}{show['poster_path']}" if show.get('poster_path') else None,
-                'vote_average': show.get('vote_average', 0),
-                'release_date': show.get('first_air_date', ''),
-            } for show in series
-        ]
-    except requests.RequestException as e:
-        print(f"Error en discover_tv_shows: {e}")
-        return []
-
-# --- FUNCIONES DE BÚSQUEDA POR NOMBRE ---
 def search_movies(query, page=1):
     url = f"{BASE_URL}/search/movie?api_key={API_KEY}&language=es-ES&query={query}&page={page}&include_adult=false"
     try:
@@ -633,6 +634,7 @@ def search_movies(query, page=1):
     except requests.RequestException as e:
         print(f"Error en search_movies: {e}")
         return []
+
 
 def search_tv_shows(query, page=1):
     url = f"{BASE_URL}/search/tv?api_key={API_KEY}&language=es-ES&query={query}&page={page}&include_adult=false"
